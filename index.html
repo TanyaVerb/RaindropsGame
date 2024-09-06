@@ -4,6 +4,140 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Raindrops</title>
+    <link rel="stylesheet" href="css/style.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chango&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Courgette&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body></body>
+  <body>
+    <div class="wrapper">
+      <div class="greeting">
+        <div class="greeting__text-container">
+          <h1 class="greeting__title">Raindrops</h1>
+          <p class="greeting__text">
+            It's raining numbers! Solve the equations before they fill the lake.
+          </p>
+        </div>
+
+        <div class="greeting__buttons-container">
+          <button class="how-to-play btn">How to Play</button>
+          <button class="play btn">Play</button>
+        </div>
+      </div>
+
+      <div class="game-container">
+        <div class="game">
+          <div class="game__fail game__points"></div>
+
+          <audio
+            class="game__audio-player"
+            id="sea"
+            autoplay="autoplay"
+            loop
+            src="sound/sea.mp3"
+          ></audio>
+          <audio
+            class="game__audio-player"
+            id="right-answer-sound"
+            src="sound/right-answer.mp3"
+          ></audio>
+          <audio
+            class="game__audio-player"
+            id="fail-sound"
+            src="sound/fail.mp3"
+          ></audio>
+          <audio
+            class="game__audio-player"
+            id="drop-sound"
+            src="sound/drop.mp3"
+          ></audio>
+
+          <!-- <div class="drop"></div> -->
+          <div class="game__place">
+            <div class="game__lives-container">
+              <p class="game__lives-text">lives:</p>
+              <div class="game__hearts-container">
+                <div class="game__heart"></div>
+                <div class="game__heart"></div>
+                <div class="game__heart"></div>
+              </div>
+            </div>
+
+            <div class="game__wave-container">
+              <div class="game__wave-one game__wave"></div>
+              <div class="game__wave-two game__wave"></div>
+              <!-- <img class="wave-img" src="img/wave2.png" alt="wave" > -->
+            </div>
+          </div>
+          <div class="result-entry">
+            <div class="result-entry__score">
+              Score: <span class="result-entry__score-value" id="score">0</span>
+            </div>
+            <div class="result-entry__calc">
+              <div class="result-entry__calc-answer">
+                <input class="result-entry__calc-answer-display" value="" />
+              </div>
+              <div class="result-entry__calc-keyboard">
+                <div><button class="result-entry__key number">7</button></div>
+                <div><button class="result-entry__key number">8</button></div>
+                <div><button class="result-entry__key number">9</button></div>
+                <div id="clear">
+                  <button class="result-entry__key clear">Clear</button>
+                </div>
+                <div><button class="result-entry__key number">4</button></div>
+                <div><button class="result-entry__key number">5</button></div>
+                <div><button class="result-entry__key number">6</button></div>
+                <div><button class="result-entry__key number">1</button></div>
+                <div><button class="result-entry__key number">2</button></div>
+                <div><button class="result-entry__key number">3</button></div>
+                <div id="enter">
+                  <button class="result-entry__key enter">Enter</button>
+                </div>
+                <div id="zero">
+                  <button class="result-entry__key number">0</button>
+                </div>
+                <div id="delete-key">
+                  <button class="result-entry__key delete-key">Delete</button>
+                </div>
+              </div>
+            </div>
+            <button id="full" class="btn fullscreen"></button>
+            <!-- <div class="level-display">Level</div> -->
+          </div>
+        </div>
+      </div>
+
+      <div class="score-board">
+        <div class="score-board__title-container">
+          <h2 class="score-board__title">Raindrops</h2>
+        </div>
+
+        <div class="score-board__leaderboard">
+          <div class="score-board__column-left">
+            <div>Score:</div>
+            <div>Right answers:</div>
+            <div>Wrong answers:</div>
+          </div>
+          <div class="score-board__column-right">
+            <div class="score-board__result-score"></div>
+            <div class="score-board__result-right-answers"></div>
+            <div class="score-board__result-wrong-answers"></div>
+          </div>
+        </div>
+        <button class="score-board__continue btn">Continue</button>
+      </div>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
 </html>

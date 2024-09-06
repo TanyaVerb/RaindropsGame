@@ -1,0 +1,79 @@
+.score-board {
+  display: none;
+  //   display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  height: 100vh;
+  min-width: 320px;
+
+  &__continue {
+    margin: auto;
+    margin-top: 60px;
+    background: $bg-btn-green;
+    &:hover {
+      background: rgb(41, 158, 67);
+    }
+  }
+
+  &__title {
+    padding-top: 150px;
+    width: 100%;
+    font-size: 100px;
+    font-family: "Chango", cursive;
+    color: $title-color;
+    text-shadow: $text-shadow-color;
+    @include respond-to("large") {
+      font-size: 100px;
+    }
+    @include respond-to("middle") {
+      font-size: 70px;
+    }
+    @include respond-to("mobile") {
+      font-size: 40px;
+      padding: 100px 10px 0px 10px;
+    }
+  }
+
+  &__leaderboard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    font-size: 40px;
+    font-family: "Yusei Magic", sans-serif;
+    color: rgb(26, 101, 151);
+
+    @include respond-to("middle") {
+      font-size: 30px;
+      padding: 0 20px;
+    }
+    @include respond-to("mobile") {
+      font-size: 22px;
+    }
+  }
+
+  &__column-left {
+    @include respond-to("mobile") {
+      padding-left: 20px;
+    }
+  }
+  &__column-right {
+    width: 80px;
+    text-align: right;
+    @include respond-to("mobile") {
+      text-align: center;
+    }
+  }
+
+  &__continue {
+    @include respond-to("middle") {
+      margin-top: 35px;
+      font-size: 22px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
+}
+
+//===========================================================================
