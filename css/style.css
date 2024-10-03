@@ -161,6 +161,9 @@
   background-size: contain;
   background-position: center;
   font-size: 16px;
+  top: -50px;
+  -webkit-transition: top 40s linear, opacity 40s linear;
+  transition: top 40s linear, opacity 40s linear;
 }
 @media screen and (max-width: 768px) {
   .raindrop {
@@ -175,6 +178,12 @@
     height: 70px;
     font-size: 10px;
   }
+}
+
+.raindrop.active {
+  /*  для активации анимации */
+  top: 100%;
+  opacity: 0.5;
 }
 
 .bonus-drop {
