@@ -84,6 +84,8 @@
       height: 67vh;
     }
   }
+  &__wave-container {
+  }
   &__wave {
     background: url("../../../img/wave3.png");
     background-repeat: repeat-x;
@@ -103,9 +105,11 @@
   }
 
   &__wave-one {
+    height: 15%;
     animation: waves 5s infinite linear;
   }
   &__wave-two {
+    height: 15%;
     opacity: 0.5;
     animation: waves 10s infinite linear;
   }

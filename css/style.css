@@ -279,10 +279,12 @@
   }
 }
 .game__wave-one {
+  height: 15%;
   -webkit-animation: waves 5s infinite linear;
           animation: waves 5s infinite linear;
 }
 .game__wave-two {
+  height: 15%;
   opacity: 0.5;
   -webkit-animation: waves 10s infinite linear;
           animation: waves 10s infinite linear;

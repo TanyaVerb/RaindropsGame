@@ -4,7 +4,7 @@ const gameEl = document.querySelector(".game-container");
 const gameArea = document.querySelector(".game");
 const playButton = document.querySelector(".play");
 console.log(playButton);
-const wave = document.querySelector(".game__wave");
+const wave = document.querySelector(".game__wave-one");
 console.log(wave);
 
 const gamePlace = document.querySelector(".game__place");
@@ -12,6 +12,10 @@ const game = document.querySelector(".game");
 
 const scoreEl = document.getElementById("score");
 console.log(scoreEl);
+
+const heartsContainer = document.querySelector(".game__lives-container");
+const levelDisplay = document.querySelector(".level-display");
+const fullEl = document.getElementById("full");
 
 //-------------------------Музыка---------------------------
 const seaSound = document.getElementById("sea");
@@ -27,6 +31,7 @@ const answerInput = document.querySelector(
 const resultEntryEl = document.querySelector(".result-entry");
 const keyboardEl = document.querySelector(".result-entry__calc-keyboard");
 keyboardEl.addEventListener("click", handlerCalcOnMouse);
+window.addEventListener("keydown", handleKeyboardInput);
 
 //____________Поле статистики___________________________________________
 const scoreBoard = document.querySelector(".score-board");
@@ -57,7 +62,12 @@ let minNumber = 0;
 let maxNumber = 10;
 let operations;
 
-//============================================================================
+//===========================================================================
+// Обработчики событий
+playButton.addEventListener("click", startGame);
+continueButton.addEventListener("click", continueGame);
+fullEl.addEventListener("click", toggleScreen);
+//==========================================================================
 function startGame() {
   seaSound.play();
   createHearts();
@@ -99,9 +109,9 @@ function generateRandomNumber(minNumber, maxNumber) {
 }
 
 //Уровни
-const levelDisplay = document.createElement("div");
-levelDisplay.classList.add("level-display");
-resultEntryEl.appendChild(levelDisplay);
+// const levelDisplay = document.createElement("div");
+// levelDisplay.classList.add("level-display");
+// resultEntryEl.appendChild(levelDisplay);
 
 // let currentLvl = 1;
 // let helper = null;
@@ -256,7 +266,6 @@ function createRaindrop() {
 
 // Функция анимации падения капли
 function animateRaindrop(raindrop) {
-  // Активируем анимацию с задержкой
   raindrop.classList.add("active");
   raindrop.style.transitionDuration = `${gameSpeed}s`;
   // gameSpeed = score >= 100 ? gameSpeed - 10 : gameSpeed;//???????????????????
@@ -267,7 +276,6 @@ function animateRaindrop(raindrop) {
   let waveRectTop = waveRect.top;
   console.log(waveRect.height);
   console.log(waveRectTop);
-
   console.log(seaLevelHeight);
 
   // Устанавливаем top капли на уровень волны
@@ -295,14 +303,7 @@ function handleDropCollision(raindrop) {
 
   fellDropSound.play();
 
-  // Находим индекс капли в массиве drops
-  const dropIndex = drops.findIndex(
-    (dropData) => dropData.raindrop === raindrop
-  );
-
-  if (dropIndex !== -1) {
-    drops.splice(dropIndex, 1); // Удаляем каплю из массива
-  }
+  drops = drops.filter((dropData) => dropData.raindrop !== raindrop);
 
   // Удаляем элемент из DOM только если он еще существует
   if (raindrop.parentNode) {
@@ -338,13 +339,13 @@ let hearts = [];
 
 function createHearts() {
   // Удаляем все предыдущие изображения сердец
-  const heartsContainer = document.querySelector(".game__lives-container"); // Предполагается, что у вас есть контейнер для сердец
+
   heartsContainer.innerHTML = "";
 
   for (let i = 0; i < initialLives; i++) {
     const heartImage = document.createElement("img");
-    heartImage.src = "../../../img/heart.png"; // Замените на путь к вашему изображению сердца
-    heartImage.classList.add("game__heart"); // Добавьте класс для стилизации
+    heartImage.src = "../../../img/heart.png";
+    heartImage.classList.add("game__heart");
     heartsContainer.appendChild(heartImage);
     hearts.push(heartImage);
   }
@@ -418,7 +419,8 @@ function handlerCalcOnMouse(e) {
 
 //*********************************************/
 //ввод ответа при помощи клавиатуры
-window.addEventListener("keydown", function (event) {
+
+function handleKeyboardInput(event) {
   // Ввод цифры
   if (event.key >= "0" && event.key <= "9") {
     answerInput.value += event.key;
@@ -437,8 +439,7 @@ window.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
     checkAnswer();
   }
-});
-
+}
 //++++++++++++++++++++++++++++++++++++++++++++++++++++
 function checkAnswer() {
   if (gameOver) return; //
@@ -449,27 +450,13 @@ function checkAnswer() {
 
   // Проверяем, совпадает ли введенный ответ с ответом хотя бы одной из капель
   const matchingDrop = drops.find((drop) => drop.answer === answer);
+  console.log(matchingDrop);
 
   if (matchingDrop) {
-    if (matchingDrop.raindrop.classList.contains("bonus-drop")) {
-      if (answer === matchingDrop.answer) {
-        // Если это бонусная капля-удаляем все капли
-        clearGamePlace();
-        answerInput.value = ""; // Очищаем поле ввода
-
-        rightAnswerSound.play();
-        countRightAnswers += 1;
-        score += 20 + countRightAnswers;
-
-        updateScore();
-
-        showPoints(20 + countRightAnswers, false);
-      } else {
-        // Если ответ неверный, обрабатываем как обычную каплю
-        handleWrongAnswer();
-      }
-    } else {
+    if (answer === matchingDrop.answer) {
       handleCorrectAnswer(matchingDrop, drops.indexOf(matchingDrop));
+    } else {
+      handleWrongAnswer();
     }
   } else {
     handleWrongAnswer();
@@ -477,23 +464,29 @@ function checkAnswer() {
 }
 
 function handleCorrectAnswer(currentDrop, dropIndex) {
+  //isBonus или нет
   rightAnswerSound.play();
-  countRightAnswers += 1;
-  score += 10 + countRightAnswers;
-
   updateScore();
-
-  showPoints(10 + countRightAnswers, false);
-
   // Создаем анимацию брызг
   createSplash(currentDrop.raindrop);
-
   gamePlace.removeChild(currentDrop.raindrop);
 
   // Удаляем каплю из массива drops
   drops.splice(dropIndex, 1);
-
   answerInput.value = ""; // Очищаем поле ввода
+
+  if (currentDrop.raindrop.classList.contains("bonus-drop")) {
+    // Если это бонусная капля-удаляем все капли
+    clearGamePlace();
+    answerInput.value = ""; // Очищаем поле ввода
+    countRightAnswers += 1;
+    score += 20 + countRightAnswers;
+    showPoints(20 + countRightAnswers, false);
+  } else {
+    countRightAnswers += 1;
+    score += 10 + countRightAnswers;
+    showPoints(10 + countRightAnswers, false);
+  }
 }
 
 function handleWrongAnswer() {
@@ -539,10 +532,6 @@ function updateScore() {
   scoreEl.textContent = score;
 }
 
-// Обработчики событий
-playButton.addEventListener("click", startGame);
-seaSound.pause();
-
 function endGame() {
   seaSound.pause();
   clearTimeout(setTimeoutId);
@@ -579,7 +568,6 @@ function clearGamePlace() {
   drops = [];
 }
 
-continueButton.addEventListener("click", continueGame);
 function continueGame() {
   scoreBoard.style.display = "none";
   greetingArea.style.display = "flex";
@@ -602,34 +590,18 @@ function continueGame() {
 }
 
 //********************************Fullscreen*********************************/
-const fullEl = document.getElementById("full"); //кнопка fullscreen
-
-fullEl.addEventListener("click", toggleScreen);
 
 function toggleScreen() {
-  // не null //если нет элементов в полноэкранном режиме
-  if (!document.fullscreenElement) {
-    gameEl.requestFullscreen(); //запрос у элемента полноэкранный режим
-    fullEl.classList.add("exit-fullscreen");
-    fullEl.classList.remove("fullscreen");
+  // Проверяем, включен ли полноэкранный режим
+  if (document.fullscreenElement) {
+    // Если включен, выходим из полноэкранного режима
+    document.exitFullscreen();
+    fullEl.classList.toggle("fullscreen"); // Меняем класс на fullscreen
+    fullEl.classList.toggle("exit-fullscreen"); // Меняем класс на exit-fullscreen
   } else {
-    if (document.fullscreenElement) {
-      document.exitFullscreen(); //все элементы возвращает к первоначальному виду
-    }
+    // Если не включен, включаем полноэкранный режим
+    gameEl.requestFullscreen();
+    fullEl.classList.toggle("fullscreen"); // Меняем класс на fullscreen
+    fullEl.classList.toggle("exit-fullscreen"); // Меняем класс на exit-fullscreen
   }
 }
-
-// function toggleScreen() {
-//   // Проверяем, включен ли полноэкранный режим
-//   if (document.fullscreenElement) {
-//     // Если включен, выходим из полноэкранного режима
-//     document.exitFullscreen();
-//     fullEl.classList.toggle("fullscreen"); // Меняем класс на fullscreen
-//     fullEl.classList.toggle("exit-fullscreen"); // Меняем класс на exit-fullscreen
-//   } else {
-//     // Если не включен, включаем полноэкранный режим
-//     gameEl.requestFullscreen();
-//     fullEl.classList.toggle("fullscreen"); // Меняем класс на fullscreen
-//     fullEl.classList.toggle("exit-fullscreen"); // Меняем класс на exit-fullscreen
-//   }
-// }
