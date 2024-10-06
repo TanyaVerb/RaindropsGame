@@ -1,18 +1,11 @@
 const greetingArea = document.querySelector(".greeting");
 const gameEl = document.querySelector(".game-container");
-
 const gameArea = document.querySelector(".game");
 const playButton = document.querySelector(".play");
-console.log(playButton);
 const wave = document.querySelector(".game__wave-one");
-console.log(wave);
-
 const gamePlace = document.querySelector(".game__place");
 const game = document.querySelector(".game");
-
 const scoreEl = document.getElementById("score");
-console.log(scoreEl);
-
 const heartsContainer = document.querySelector(".game__lives-container");
 const levelDisplay = document.querySelector(".level-display");
 const fullEl = document.getElementById("full");
@@ -354,7 +347,6 @@ function createHearts() {
 function loseLife() {
   if (livesCount > 0) {
     livesCount--;
-    console.log(livesCount);
 
     failSound.play();
     // Находим последний  элемент и добавляем класс "game__lose"
@@ -363,12 +355,15 @@ function loseLife() {
     //_________
     // Получаем высоту волны
     const waveHeight = wave.offsetHeight;
-    // Поднимаем уровень моря на 20% от высоты волны
-    seaLevelHeight += waveHeight * 0.2;
+    console.log(waveHeight);
+
+    // Поднимаем уровень моря на 30% от высоты волны
+    seaLevelHeight = waveHeight * 0.3;
 
     wave.style.height = wave.offsetHeight + seaLevelHeight + "px";
 
     console.log(seaLevelHeight);
+    console.log(wave.offsetHeight, wave.offsetTop);
   }
 
   if (livesCount === 0) {
@@ -464,7 +459,6 @@ function checkAnswer() {
 }
 
 function handleCorrectAnswer(currentDrop, dropIndex) {
-  //isBonus или нет
   rightAnswerSound.play();
   updateScore();
   // Создаем анимацию брызг
@@ -473,12 +467,11 @@ function handleCorrectAnswer(currentDrop, dropIndex) {
 
   // Удаляем каплю из массива drops
   drops.splice(dropIndex, 1);
-  answerInput.value = ""; // Очищаем поле ввода
+  answerInput.value = "";
 
   if (currentDrop.raindrop.classList.contains("bonus-drop")) {
-    // Если это бонусная капля-удаляем все капли
     clearGamePlace();
-    answerInput.value = ""; // Очищаем поле ввода
+    answerInput.value = "";
     countRightAnswers += 1;
     score += 20 + countRightAnswers;
     showPoints(20 + countRightAnswers, false);
@@ -506,7 +499,7 @@ function handleWrongAnswer() {
   }, 500);
 
   showPoints(13, true);
-  // Проверка на проигрыш
+
   if (errors >= maxErrors) {
     setTimeout(() => {
       endGame();
@@ -515,15 +508,14 @@ function handleWrongAnswer() {
   }
 }
 function createSplash(currentDrop) {
-  // Создаем анимацию брызг
   const splash = document.createElement("div");
   splash.classList.add("splash");
   splash.style.left = currentDrop.style.left;
   splash.style.top = currentDrop.style.top;
-  gamePlace.appendChild(splash); //можно append(splash)
+  gamePlace.appendChild(splash);
 
   setTimeout(() => {
-    gamePlace.removeChild(splash); //можно remove()
+    gamePlace.removeChild(splash);
   }, 500); // - время анимации брызг
 }
 
@@ -532,6 +524,9 @@ function updateScore() {
   scoreEl.textContent = score;
 }
 
+seaSound.pause();
+
+//--------------------------------------------------------------------
 function endGame() {
   seaSound.pause();
   clearTimeout(setTimeoutId);
@@ -596,12 +591,12 @@ function toggleScreen() {
   if (document.fullscreenElement) {
     // Если включен, выходим из полноэкранного режима
     document.exitFullscreen();
-    fullEl.classList.toggle("fullscreen"); // Меняем класс на fullscreen
-    fullEl.classList.toggle("exit-fullscreen"); // Меняем класс на exit-fullscreen
+    fullEl.classList.toggle("fullscreen");
+    fullEl.classList.toggle("exit-fullscreen");
   } else {
     // Если не включен, включаем полноэкранный режим
     gameEl.requestFullscreen();
-    fullEl.classList.toggle("fullscreen"); // Меняем класс на fullscreen
-    fullEl.classList.toggle("exit-fullscreen"); // Меняем класс на exit-fullscreen
+    fullEl.classList.toggle("fullscreen");
+    fullEl.classList.toggle("exit-fullscreen");
   }
 }

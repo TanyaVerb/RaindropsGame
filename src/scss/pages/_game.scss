@@ -4,15 +4,14 @@
   height: 120px;
   display: flex;
   justify-content: space-around;
-
   flex-direction: column;
   align-items: center;
   background-image: url(../../../img/drop.png);
   background-size: contain;
   background-position: center;
   font-size: 16px;
-  top: -50px; //изменено
-  transition: top 40s linear, opacity 40s linear; //изменено
+  top: -50px;
+  transition: top 40s linear, opacity 40s linear;
 
   @include respond-to("middle") {
     width: 100px;
@@ -27,7 +26,6 @@
 }
 
 .raindrop.active {
-  /*  для активации анимации */
   top: 100%;
   opacity: 0.5;
 }
@@ -55,6 +53,7 @@
 .game-container {
   display: none;
   // height: 100%;
+  height: 100vh;
   min-width: 310px;
   background: linear-gradient(rgb(250, 250, 253) 50%, rgb(132, 210, 230))
     no-repeat;
@@ -89,15 +88,16 @@
   &__wave {
     background: url("../../../img/wave3.png");
     background-repeat: repeat-x;
-    width: 2000px;
-    height: 200px;
+    width: 200%;
+    // height: 200px;
+    height: 15%;
     position: absolute;
     margin-left: -200px;
-    margin-right: 200px;
+    // margin-right: 200px;
     bottom: 0;
     left: 0;
     @include respond-to("mobile") {
-      height: 100px;
+      // height: 100px;
     }
     // @include respond-to("middle") {
     //   height: 250px; //???
@@ -105,11 +105,11 @@
   }
 
   &__wave-one {
-    height: 15%;
+    // height: 15%;
     animation: waves 5s infinite linear;
   }
   &__wave-two {
-    height: 15%;
+    // height: 15%;
     opacity: 0.5;
     animation: waves 10s infinite linear;
   }
