@@ -1,81 +1,32 @@
-let lives = 3;
-let maxError = 3; // (Максимальное количество ошибок)
-let seaLevelHeight = 0;
-let initialWaveHeight;
-let currentExpression = "";
-let stepTop;
-let gameSpeed = 200; //скорость падения капли
-
-// opacityDrop = 1;
-let currentScore = 0;
-let minusPoints;
-let plusPoints;
-let countAutoDrop = 0;
-
-//-____________________________________
-
 const greetingArea = document.querySelector(".greeting");
 const gameEl = document.querySelector(".game-container");
-
 const gameArea = document.querySelector(".game");
 const playButton = document.querySelector(".play");
-console.log(playButton);
-const wave = document.querySelector(".game__wave");
-console.log(wave);
-
+const wave = document.querySelector(".game__wave-one");
 const gamePlace = document.querySelector(".game__place");
 const game = document.querySelector(".game");
-
 const scoreEl = document.getElementById("score");
-console.log(scoreEl);
-
-let hearts = document.querySelectorAll(".game__heart"); //жизни
-
-//****************Fullscreen*****************/
+const heartsContainer = document.querySelector(".game__lives-container");
+const levelDisplay = document.querySelector(".level-display");
 const fullEl = document.getElementById("full");
 
-fullEl.addEventListener("click", toggleScreen);
-
-function toggleScreen() {
-  if (!document.fullscreenElement) {
-    gameEl.requestFullscreen();
-    fullEl.classList.add("exit-fullscreen");
-    fullEl.classList.remove("fullscreen");
-  } else {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
-  }
-}
+//-------------------------Музыка---------------------------
+const seaSound = document.getElementById("sea");
+const fellDropSound = document.getElementById("drop-sound");
+const rightAnswerSound = document.getElementById("right-answer-sound");
+const failSound = document.getElementById("fail-sound");
+//----------------------------------------------------------
 
 //____________________Калькулятор__________________________
-const numberButtons = document.querySelectorAll(".number");
-console.log(numberButtons);
-const clearButton = document.querySelector(".clear");
-const enterButton = document.querySelector(".enter");
-const deleteButton = document.querySelector(".delete-key");
 const answerInput = document.querySelector(
   ".result-entry__calc-answer-display"
 );
-
 const resultEntryEl = document.querySelector(".result-entry");
+const keyboardEl = document.querySelector(".result-entry__calc-keyboard");
+keyboardEl.addEventListener("click", handlerCalcOnMouse);
+window.addEventListener("keydown", handleKeyboardInput);
 
-const maxErrors = 3; // Максимальное количество ошибок
-// const maxScore = 110; // Максимальный счет для выигрыша ???
-// Игровые переменные
-let score = 0;
-let errors = 0;
-let drops = []; // массив капель
-let raindropAnswers = []; //массив ответов
-
-let rightAnswers = 0;
-let countRightAnswers = 0;
-
-let gameOver = false;
-let animation;
-let setIntervalId;
-
-//____________
+//____________Поле статистики___________________________________________
 const scoreBoard = document.querySelector(".score-board");
 const continueButton = document.querySelector(".score-board__continue");
 const resultScore = document.querySelector(".score-board__result-score");
@@ -85,87 +36,111 @@ const resultRightAnswers = document.querySelector(
 const resultWrongAnswers = document.querySelector(
   ".score-board__result-wrong-answers"
 );
+//============================Переменные и константы==========================
+let countAutoDrop = 0;
+let countRightAnswers = 0;
 
-//-------------------------Музыка---------------------------
-const seaSound = document.getElementById("sea");
-const fellDropSound = document.getElementById("drop-sound");
-const rightAnswerSound = document.getElementById("right-answer-sound");
-const failSound = document.getElementById("fail-sound");
-//----------------------------------------------------------
+const maxErrors = 3; // Максимальное количество ошибок
+let score = 0;
+let errors = 0;
+
+let seaLevelHeight = 0;
+let initialWaveHeight;
+let gameSpeed = 40; //скорость падения капли
+
+let drops = []; // массив капель
+let raindropAnswers = []; //массив ответов
+let gameOver = false;
+let minNumber = 0;
+let maxNumber = 10;
+let operations;
+
+let waveRect;
+let waveRectTop;
+//===========================================================================
+// Обработчики событий
+playButton.addEventListener("click", startGame);
+continueButton.addEventListener("click", continueGame);
+fullEl.addEventListener("click", toggleScreen);
+//==========================================================================
+function startGame() {
+  seaSound.play();
+  createHearts();
+  // Очищаем поле и переменные
+  score = 0;
+  errors = 0;
+  drops = [];
+  updateScore();
+
+  gameEl.style.display = "block";
+  greetingArea.style.display = "none";
+  answerInput.value = "";
+
+  initialWaveHeight = wave.offsetHeight; // Сохраняем начальную высоту волны
+  console.log(initialWaveHeight);
+
+  // Создаем первую каплю при запуске игры
+  createRaindrop();
+}
 
 function showPoints(points, isMinus) {
-  let scoreEl = document.querySelector(".game__points");
-
-  if (!scoreEl) {
-    scoreEl = document.createElement("div");
-    scoreEl.classList.add("game__points");
-    gamePlace.appendChild(scoreEl);
-  }
+  let scoreEl = document.createElement("div");
+  scoreEl.classList.add("game__points");
+  gamePlace.appendChild(scoreEl);
 
   scoreEl.textContent = isMinus ? `-${points}` : `+${points}`;
 
-  gamePlace.appendChild(scoreEl); //если убрать, то первый раз не покажет баллы
-
   scoreEl.classList.add("fade-out"); //  класс для анимации исчезновения
 
-  // удаляем элемент после окончания анимации
   setTimeout(() => {
-    if (scoreEl.parentNode) {
-      scoreEl.parentNode.removeChild(scoreEl);
-    }
+    scoreEl.remove(); // Удаляем элемент более лаконично
   }, 2000);
 }
 
 //________________________
-let min = 0;
-let max = 10;
-let operations;
 
-function generateRandomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function generateRandomNumber(minNumber, maxNumber) {
+  return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 }
-
-//Уровни
-const levelDisplay = document.createElement("div");
-levelDisplay.classList.add("level-display");
-resultEntryEl.appendChild(levelDisplay);
 
 function setDifficult() {
   if (score < 100) {
-    min = 0;
-    max = 10;
-    gameSpeed = 200;
+    minNumber = 0;
+    maxNumber = 10;
+    gameSpeed = 40;
     operations = ["+", "-"];
     levelDisplay.textContent = "Level: 1";
   } else if (score > 100 && score < 200) {
-    min = 10;
-    max = 20;
+    minNumber = 10;
+    maxNumber = 20;
     operations = ["+", "-"];
-    gameSpeed = 150;
+    gameSpeed = 30;
     levelDisplay.textContent = "Level: 2";
   } else if (score > 200 && score < 300) {
-    min = 20;
-    max = 30;
+    minNumber = 20;
+    maxNumber = 30;
     operations = ["+", "-", "*"];
-    gameSpeed = 100;
+    gameSpeed = 20;
     levelDisplay.textContent = "Level: 3";
   } else if (score > 300 && score < 400) {
-    min = 30;
-    max = 35;
+    minNumber = 30;
+    maxNumber = 35;
     operations = ["+", "-", "*", "/"];
-    gameSpeed = 100;
+    gameSpeed = 10;
     levelDisplay.textContent = "Level: 4";
   }
-  console.log({ min, max, operations });
+  console.log({ minNumber, maxNumber, operations });
 
-  return { min, max, operations };
+  return { minNumber, maxNumber, operations };
 }
 
 // Создание выражения
 function generateExpression() {
-  const { min, max, operations } = setDifficult(); // Устанавливаем уровень сложности перед генерацией
-  let firstNum = generateRandomNumber(min, max);
-  let secondNum = generateRandomNumber(min, max);
+  const { minNumber, maxNumber, operations } = setDifficult(); // Устанавливаем уровень сложности перед генерацией
+  let firstNum = generateRandomNumber(minNumber, maxNumber);
+  let secondNum = generateRandomNumber(minNumber, maxNumber);
+
+  console.log(firstNum, secondNum);
 
   const operator = operations[Math.floor(Math.random() * operations.length)];
   if ((firstNum < secondNum && operator === "-") || operator === "/") {
@@ -175,56 +150,43 @@ function generateExpression() {
     firstNum -= firstNum % secondNum; //уменьшаем первое число на остаток от деления
   }
 
-  currentExpression = `${firstNum} ${operator} ${secondNum}`;
-
-  return currentExpression;
+  return { firstNum, operator, secondNum };
 }
 console.log(generateExpression());
-
-function hiddenDrop() {
-  opacityDrop -= 0.1;
-}
-
-function calculateExpression(exp) {
-  // Разделяем выражение на части
-  const parts = exp.split(" ");
-  const num1 = Number(parts[0]);
-  const operation = parts[1];
-  const num2 = Number(parts[2]);
-
-  console.log(operation);
-
+//----------------------------------
+function calculateExpression(firstNum, operator, secondNum) {
   // Выполняем операцию
-  switch (operation) {
+  switch (operator) {
     case "+":
-      return num1 + num2;
+      console.log(firstNum + secondNum);
+
+      return firstNum + secondNum;
     case "-":
-      return num1 - num2;
+      console.log(firstNum - secondNum);
+      return firstNum - secondNum;
     case "*":
-      return num1 * num2;
+      console.log(firstNum * secondNum);
+      return firstNum * secondNum;
     case "/":
-      return num1 / num2;
+      console.log(firstNum / secondNum);
+      return firstNum / secondNum;
   }
 }
-
 //=======================================================
 let totalDropsCreated = 0;
-// let dropsBeforeBonus = 5; // Количество обычных капель перед первой бонусной
+
 // Создание капли дождя
 function createRaindrop() {
   totalDropsCreated++;
-  // const isBonus = totalDropsCreated > dropsBeforeBonus && Math.random() < 0.2; //Вероятность получения бонусной капли составляет 20%.
 
   const raindrop = document.createElement("div");
   raindrop.classList.add("raindrop");
-  // Определение типа капли
+
   //------ (isBonus)
   if (totalDropsCreated % 5 === 0) {
     raindrop.classList.add("bonus-drop");
   }
   gamePlace.appendChild(raindrop);
-  //Начальное положение капли - за пределами gamePlace
-  raindrop.style.top = "-50px"; //  Изменяем начальное положение капли
 
   //Вычисляем случайное левое положение в пределах gamePlace
   let leftPos = generateRandomNumber(
@@ -233,33 +195,15 @@ function createRaindrop() {
   );
   raindrop.style.left = leftPos + "px";
 
-  let exp = generateExpression();
-  console.log(exp); //выражение в виде строки
+  const { firstNum, operator, secondNum } = generateExpression();
 
-  //==========Добавляем выражение в каплю===============
-  // Создаем элементы для выражения
-  const num1El = document.createElement("div");
-  num1El.classList.add("num1");
-  const num2El = document.createElement("div");
-  num2El.classList.add("num2");
-  const operatorEl = document.createElement("div");
-  operatorEl.classList.add("operator");
+  raindrop.innerHTML = `
+    <div class="num1">${firstNum}</div>
+    <div class="operator">${operator}</div>
+    <div class="num2">${secondNum}</div>
+  `;
 
-  // Разбиваем выражение на части
-  const parts = exp.split(" ");
-  console.log(parts);
-  num1El.textContent = parts[0];
-  operatorEl.textContent = parts[1];
-  num2El.textContent = parts[2];
-
-  // Добавляем элементы в каплю
-  raindrop.appendChild(num1El);
-  raindrop.appendChild(operatorEl);
-  raindrop.appendChild(num2El);
-
-  //================================================
-
-  let raindropAnswer = calculateExpression(exp); //ответ в капле в виде числа
+  let raindropAnswer = calculateExpression(firstNum, operator, secondNum); //ответ в капле в виде числа
   console.log(raindropAnswer);
 
   // Сохраняем ответ и каплю в объекте
@@ -268,67 +212,139 @@ function createRaindrop() {
     answer: raindropAnswer,
   };
 
-  drops.push(raindropData); //добавляем в массив капли
-  console.log(drops);
-
   // Запускаем анимацию падения
   animateRaindrop(raindrop);
+
+  drops.push(raindropData); //добавляем в массив капли
+  console.log(drops);
 
   // Создаем следующую каплю с задержкой
   setTimeoutId = setTimeout(() => {
     createRaindrop();
   }, 3500);
 }
+//******************************************************* */
+function updateWaveRectTop() {
+  waveRect = wave.getBoundingClientRect();
+  waveRectTop = waveRect.top;
+  console.log(waveRectTop);
 
+  return waveRectTop;
+}
+
+//*********************************************************** */
 // Функция анимации падения капли
 function animateRaindrop(raindrop) {
-  let animation = setInterval(() => {
-    raindrop.style.top = parseInt(raindrop.style.top) + 5 + "px";
+  raindrop.classList.add("active");
+  raindrop.style.transitionDuration = `${gameSpeed}s`;
+  let dropRect = raindrop.getBoundingClientRect();
+  console.log(dropRect);
 
-    // Получаем точные позиции капли и волны
-    const dropRect = raindrop.getBoundingClientRect();
-    const waveRect = wave.getBoundingClientRect();
+  waveRectTop = updateWaveRectTop();
 
-    if (parseInt(dropRect.bottom) > parseInt(waveRect.top)) {
-      console.log(wave.offsetTop);
-      countAutoDrop++;
-      console.log(countAutoDrop); //количество капель утонуло
-      fellDropSound.play();
-      clearInterval(animation);
-      // Находим индекс капли в массиве drops
-      const dropIndex = drops.findIndex(
-        (dropData) => dropData.raindrop === raindrop
-      );
-      if (dropIndex !== -1) {
-        drops.splice(dropIndex, 1); // Удаляем каплю из массива
-      }
-      // Удаляем элемент из DOM только если он еще существует
-      if (raindrop.parentNode) {
-        raindrop.parentNode.removeChild(raindrop);
-      }
+  console.log(waveRectTop);
 
-      let currentDrop = raindrop;
-      console.log(currentDrop);
+  // Устанавливаем top капли на уровень волны
+  raindrop.style.top = waveRectTop - dropRect.height + "px";
+  console.log(raindrop.style.top);
+  console.log(dropRect.height);
 
-      createSplash(currentDrop);
-      // loseLife();
-      score -= 13;
-      if (score < 0) {
-        score = 0;
-      }
-      // minusPoints = 13;
-      showPoints(13, true); //списываются баллы, если капля упала в море
+  let collisionHandled = false;
 
-      // для того, чтобы после последнего неправильного ответа, успевало показаться  showPoints(13, true)
-      setTimeout(() => {
-        loseLife();
-      }, 500);
-      // loseLife();
-      updateScore();
+  // Проверяем столкновение после завершения анимации
+  raindrop.addEventListener("transitionend", () => {
+    if (!collisionHandled) {
+      collisionHandled = true;
+      handleDropCollision(raindrop);
     }
-  }, gameSpeed);
+  });
 
   console.log(gameSpeed);
+}
+
+// Обработка столкновения
+function handleDropCollision(raindrop) {
+  countAutoDrop++;
+  console.log(countAutoDrop);
+
+  fellDropSound.play();
+  gamePlace.removeChild(raindrop);
+  drops = drops.filter((dropData) => dropData.raindrop !== raindrop);
+
+  // // Удаляем элемент из DOM только если он еще существует
+  // if (raindrop.parentNode) {
+  //   raindrop.parentNode.removeChild(raindrop);
+  //   console.log("капля удалена");
+  // }
+
+  let currentDrop = raindrop;
+  console.log(currentDrop);
+
+  createSplash(currentDrop);
+
+  score -= 13;
+  if (score < 0) {
+    score = 0;
+  }
+
+  showPoints(13, true);
+
+  setTimeout(() => {
+    loseLife();
+  }, 500);
+
+  updateScore();
+}
+
+//-------------------------------Отрисовка количества жизней(сердец)
+
+// Устанавливаем начальное количество жизней,кот.можно менять
+let initialLives = 3;
+livesCount = initialLives; // Изначальное количество жизней
+let hearts = [];
+
+function createHearts() {
+  // Удаляем все предыдущие изображения сердец
+
+  heartsContainer.innerHTML = "";
+
+  for (let i = 0; i < initialLives; i++) {
+    const heartImage = document.createElement("img");
+    heartImage.src = "../../../img/heart.png";
+    heartImage.classList.add("game__heart");
+    heartsContainer.appendChild(heartImage);
+    hearts.push(heartImage);
+  }
+}
+
+function loseLife() {
+  if (livesCount > 0) {
+    livesCount--;
+
+    failSound.play();
+    // Находим последний  элемент и добавляем класс "game__lose"
+    let lastHeart = hearts[livesCount]; //элемент массива hearts, индекс кот. соответствует текущему кол-ву жизней.
+    lastHeart.classList.add("game__lose");
+    //_________
+    // Получаем высоту волны
+    const waveHeight = wave.offsetHeight;
+    console.log(waveHeight);
+
+    // Поднимаем уровень моря на 30% от высоты волны
+    seaLevelHeight = waveHeight * 0.3;
+
+    wave.style.height = wave.offsetHeight + seaLevelHeight + "px";
+
+    // updateWaveRectTop();
+    console.log(seaLevelHeight);
+    console.log(wave.offsetHeight, wave.offsetTop);
+  }
+
+  if (livesCount === 0) {
+    // failSound.pause();
+    hearts = [];
+    endGame();
+  }
 }
 
 //========================================================
@@ -339,28 +355,41 @@ function clearDisplayValue() {
 function deleteLastChar() {
   answerInput.value = answerInput.value.slice(0, -1);
 }
-//Обработчик клика на цифры
-numberButtons.forEach((number) => {
-  number.addEventListener("click", () => {
-    answerInput.value += number.textContent;
-  });
-});
 
-//Обработчик клика на Delete
-deleteButton.addEventListener("click", () => {
-  // answerInput.value = answerInput.value.slice(0, -1);
-  deleteLastChar();
-});
-//Обработчик клика на Clear
-clearButton.addEventListener("click", () => {
-  // answerInput.value = "";
-  clearDisplayValue();
-});
-//Обработчик клика на Enter
-enterButton.addEventListener("click", checkAnswer);
+function printNumbersScreen(numbersBtn) {
+  // Получаем текущее значение на экране калькулятора
+  let currentScreenValue = answerInput.value;
+  // Добавляем введенное число к текущему значению
+  answerInput.value = currentScreenValue + numbersBtn;
+}
+
+//-------------------------
+
+function handlerCalcOnMouse(e) {
+  e.stopPropagation();
+  let numbersBtn = e.target.getAttribute("data-num");
+  let funcBtn = e.target.getAttribute("data-func");
+  if (funcBtn || numbersBtn) {
+    switch (funcBtn) {
+      case "Enter":
+        checkAnswer();
+        break;
+      case "Delete":
+        deleteLastChar();
+        break;
+      case "Escape":
+        clearDisplayValue();
+        break;
+      default:
+        printNumbersScreen(numbersBtn);
+    }
+  }
+}
+
 //*********************************************/
 //ввод ответа при помощи клавиатуры
-window.addEventListener("keydown", function (event) {
+
+function handleKeyboardInput(event) {
   // Ввод цифры
   if (event.key >= "0" && event.key <= "9") {
     answerInput.value += event.key;
@@ -369,55 +398,34 @@ window.addEventListener("keydown", function (event) {
 
   // Удаление последней цифры (Delete)
   if (event.key === "Delete") {
-    // answerInput.value = answerInput.value.slice(0, -1);
     deleteLastChar();
   }
 
   // Очистка поля (Clear)
   if (event.key === "Escape") {
-    // answerInput.value = ""; // Очищаем значение input
     clearDisplayValue();
   }
   if (event.key === "Enter") {
     checkAnswer();
   }
-});
-
+}
 //++++++++++++++++++++++++++++++++++++++++++++++++++++
 function checkAnswer() {
-  if (gameOver) return; //??????????????????????
+  if (gameOver) return; //
 
   if (drops.length === 0) return; // Проверка, есть ли капли
 
-  const answer = parseFloat(answerInput.value);
+  const answer = parseFloat(answerInput.value); //можно Number()
 
   // Проверяем, совпадает ли введенный ответ с ответом хотя бы одной из капель
-  const dropIndex = drops.findIndex((drop) => drop.answer === answer);
+  const matchingDrop = drops.find((drop) => drop.answer === answer);
+  console.log(matchingDrop);
 
-  if (dropIndex !== -1) {
-    // Если совпадение найдено
-    const currentDrop = drops[dropIndex];
-
-    if (currentDrop.raindrop.classList.contains("bonus-drop")) {
-      if (answer === currentDrop.answer) {
-        // Если это бонусная капля-удаляем все капли
-        clearGamePlace();
-        answerInput.value = ""; // Очищаем поле ввода
-
-        rightAnswerSound.play();
-        rightAnswers += 1;
-        score += 20 + rightAnswers;
-
-        updateScore();
-        // plusPoints = 20 + rightAnswers;
-        // showPlusPoints(rightAnswers);
-        showPoints(20 + rightAnswers, false);
-      } else {
-        // Если ответ неверный, обрабатываем как обычную каплю
-        handleWrongAnswer();
-      }
+  if (matchingDrop) {
+    if (answer === matchingDrop.answer) {
+      handleCorrectAnswer(matchingDrop, drops.indexOf(matchingDrop));
     } else {
-      handleCorrectAnswer(currentDrop, dropIndex);
+      handleWrongAnswer();
     }
   } else {
     handleWrongAnswer();
@@ -426,29 +434,32 @@ function checkAnswer() {
 
 function handleCorrectAnswer(currentDrop, dropIndex) {
   rightAnswerSound.play();
-  rightAnswers += 1;
-  score += 10 + rightAnswers;
-
   updateScore();
-  // plusPoints = 10 + rightAnswers;
-  // showPlusPoints(rightAnswers);
-  showPoints(10 + rightAnswers, false);
-
   // Создаем анимацию брызг
   createSplash(currentDrop.raindrop);
-
   gamePlace.removeChild(currentDrop.raindrop);
 
   // Удаляем каплю из массива drops
   drops.splice(dropIndex, 1);
+  answerInput.value = "";
 
-  answerInput.value = ""; // Очищаем поле ввода
+  if (currentDrop.raindrop.classList.contains("bonus-drop")) {
+    clearGamePlace();
+    answerInput.value = "";
+    countRightAnswers += 1;
+    score += 20 + countRightAnswers;
+    showPoints(20 + countRightAnswers, false);
+  } else {
+    countRightAnswers += 1;
+    score += 10 + countRightAnswers;
+    showPoints(10 + countRightAnswers, false);
+  }
 }
 
 function handleWrongAnswer() {
   failSound.play();
   errors++;
-  // minusPoints = 13;
+
   score -= 13;
 
   answerInput.value = "";
@@ -460,21 +471,17 @@ function handleWrongAnswer() {
   setTimeout(() => {
     loseLife();
   }, 500);
-  // loseLife();
+
   showPoints(13, true);
-  // Проверка на проигрыш
+
   if (errors >= maxErrors) {
     setTimeout(() => {
       endGame();
       gameOver = true;
     }, 1200);
-    // endGame();
   }
-  // showMinusPoints();
-  // showPoints(13, true);
 }
 function createSplash(currentDrop) {
-  // Создаем анимацию брызг
   const splash = document.createElement("div");
   splash.classList.add("splash");
   splash.style.left = currentDrop.style.left;
@@ -491,57 +498,12 @@ function updateScore() {
   scoreEl.textContent = score;
 }
 
-// Обработчики событий
-playButton.addEventListener("click", startGame);
 seaSound.pause();
 
-function startGame() {
-  seaSound.play();
-  // Очищаем поле и переменные
-  score = 0;
-  errors = 0;
-  drops = [];
-  updateScore();
-
-  gameEl.style.display = "block";
-  greetingArea.style.display = "none";
-
-  answerInput.value = "";
-
-  initialWaveHeight = wave.offsetHeight; // Сохраняем начальную высоту волны
-
-  // Создаем первую каплю при запуске игры
-  createRaindrop(generateExpression());
-}
-
-function loseLife() {
-  if (lives > 0) {
-    lives--;
-
-    failSound.play();
-    // Находим последний  элемент и добавляем класс "game__lose"
-    let lastHeart = hearts[lives]; //элемент массива hearts, индекс кот. соответствует текущему кол-ву жизней.
-    lastHeart.classList.add("game__lose");
-  }
-  //_________
-  // Получаем высоту волны
-  const waveHeight = wave.offsetHeight;
-  // Поднимаем уровень моря на 20% от высоты волны
-  seaLevelHeight += waveHeight * 0.2;
-
-  wave.style.height = wave.offsetHeight + seaLevelHeight + "px";
-  console.log(seaLevelHeight);
-  if (lives === 0) {
-    // failSound.pause();
-    clearInterval(animation);
-    endGame();
-  }
-}
-
+//--------------------------------------------------------------------
 function endGame() {
   seaSound.pause();
   clearTimeout(setTimeoutId);
-  clearInterval(animation);
 
   // Удаляем все капли
   clearGamePlace();
@@ -553,7 +515,7 @@ function endGame() {
 
   // Вывод результатов
   resultScore.textContent = score;
-  resultRightAnswers.textContent = rightAnswers;
+  resultRightAnswers.textContent = countRightAnswers;
   resultWrongAnswers.textContent = errors;
 
   gameEl.style.display = "none";
@@ -575,14 +537,13 @@ function clearGamePlace() {
   drops = [];
 }
 
-continueButton.addEventListener("click", continueGame);
 function continueGame() {
   scoreBoard.style.display = "none";
   greetingArea.style.display = "flex";
 
-  lives = 3;
+  livesCount = 3;
 
-  rightAnswers = 0;
+  countRightAnswers = 0;
   totalDropsCreated = 0;
   countAutoDrop = 0;
 
@@ -595,4 +556,21 @@ function continueGame() {
   seaLevelHeight = 0;
   wave.style.height = initialWaveHeight + "px";
   startGame();
+}
+
+//********************************Fullscreen*********************************/
+
+function toggleScreen() {
+  // Проверяем, включен ли полноэкранный режим
+  if (document.fullscreenElement) {
+    // Если включен, выходим из полноэкранного режима
+    document.exitFullscreen();
+    fullEl.classList.toggle("fullscreen");
+    fullEl.classList.toggle("exit-fullscreen");
+  } else {
+    // Если не включен, включаем полноэкранный режим
+    gameEl.requestFullscreen();
+    fullEl.classList.toggle("fullscreen");
+    fullEl.classList.toggle("exit-fullscreen");
+  }
 }

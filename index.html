@@ -62,22 +62,17 @@
             src="sound/drop.mp3"
           ></audio>
 
-          <!-- <div class="drop"></div> -->
           <div class="game__place">
             <div class="game__lives-container">
               <p class="game__lives-text">lives:</p>
-              <div class="game__hearts-container">
-                <div class="game__heart"></div>
-                <div class="game__heart"></div>
-                <div class="game__heart"></div>
-              </div>
+              <div class="game__hearts-container"></div>
             </div>
-
-            <div class="game__wave-container">
-              <div class="game__wave-one game__wave"></div>
-              <div class="game__wave-two game__wave"></div>
-              <!-- <img class="wave-img" src="img/wave2.png" alt="wave" > -->
-            </div>
+            <!-- 
+            <div class="game__wave-container"> -->
+            <div class="game__wave-one game__wave"></div>
+            <div class="game__wave-two game__wave"></div>
+            <!-- <img class="wave-img" src="img/wave2.png" alt="wave" > -->
+            <!-- </div> -->
           </div>
           <div class="result-entry">
             <div class="result-entry__score">
@@ -88,31 +83,58 @@
                 <input class="result-entry__calc-answer-display" value="" />
               </div>
               <div class="result-entry__calc-keyboard">
-                <div><button class="result-entry__key number">7</button></div>
-                <div><button class="result-entry__key number">8</button></div>
-                <div><button class="result-entry__key number">9</button></div>
-                <div id="clear">
-                  <button class="result-entry__key clear">Clear</button>
+                <div>
+                  <button data-num="7" class="result-entry__key">7</button>
                 </div>
-                <div><button class="result-entry__key number">4</button></div>
-                <div><button class="result-entry__key number">5</button></div>
-                <div><button class="result-entry__key number">6</button></div>
-                <div><button class="result-entry__key number">1</button></div>
-                <div><button class="result-entry__key number">2</button></div>
-                <div><button class="result-entry__key number">3</button></div>
+                <div>
+                  <button data-num="8" class="result-entry__key">8</button>
+                </div>
+                <div>
+                  <button data-num="9" class="result-entry__key">9</button>
+                </div>
+                <div id="clear">
+                  <button data-func="Escape" class="result-entry__key clear">
+                    Clear
+                  </button>
+                </div>
+                <div>
+                  <button data-num="4" class="result-entry__key">4</button>
+                </div>
+                <div>
+                  <button data-num="5" class="result-entry__key">5</button>
+                </div>
+                <div>
+                  <button data-num="6" class="result-entry__key">6</button>
+                </div>
+                <div>
+                  <button data-num="1" class="result-entry__key">1</button>
+                </div>
+                <div>
+                  <button data-num="2" class="result-entry__key">2</button>
+                </div>
+                <div>
+                  <button data-num="3" class="result-entry__key">3</button>
+                </div>
                 <div id="enter">
-                  <button class="result-entry__key enter">Enter</button>
+                  <button data-func="Enter" class="result-entry__key enter">
+                    Enter
+                  </button>
                 </div>
                 <div id="zero">
-                  <button class="result-entry__key number">0</button>
+                  <button data-num="0" class="result-entry__key">0</button>
                 </div>
                 <div id="delete-key">
-                  <button class="result-entry__key delete-key">Delete</button>
+                  <button
+                    data-func="Delete"
+                    class="result-entry__key delete-key"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>
             <button id="full" class="btn fullscreen"></button>
-            <!-- <div class="level-display">Level</div> -->
+            <div class="level-display">Level</div>
           </div>
         </div>
       </div>
@@ -139,5 +161,7 @@
     </div>
 
     <script src="main.js"></script>
+    <!-- <script src="main copy.js"></script> -->
+    <!-- <script src="main copy 2.js"></script> -->
   </body>
 </html>
