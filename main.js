@@ -55,6 +55,8 @@ let minNumber = 0;
 let maxNumber = 10;
 let operations;
 
+let waveRect;
+let waveRectTop;
 //===========================================================================
 // Обработчики событий
 playButton.addEventListener("click", startGame);
@@ -100,40 +102,6 @@ function showPoints(points, isMinus) {
 function generateRandomNumber(minNumber, maxNumber) {
   return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 }
-
-//Уровни
-// const levelDisplay = document.createElement("div");
-// levelDisplay.classList.add("level-display");
-// resultEntryEl.appendChild(levelDisplay);
-
-// let currentLvl = 1;
-// let helper = null;
-// levelDisplay.textContent = `Level:${currentLvl}`;
-
-// function setDifficult() {
-//   operations = ["+", "-", "*", "/"];
-//   minNumber = 0;
-//   maxNumber = 10;
-//   // gameSpeed = 40;
-
-//   console.log(countRightAnswers);
-
-//   if (helper === currentLvl) return;
-//   if (countRightAnswers % 5 === 0 && countRightAnswers > 0) {
-//     // helper = currentLvl;
-//     minNumber = minNumber + 1;
-//     maxNumber = maxNumber + 1;
-//     // gameSpeed = score >= 100 ? gameSpeed - 10 : gameSpeed; //??????????
-//     currentLvl = currentLvl + 1;
-//     helper = currentLvl;
-//     levelDisplay.textContent = `Level:${currentLvl}`;
-//   }
-
-//   // console.log({ minNumber, maxNumber, operations });
-//   console.log({ minNumber, maxNumber, operations });
-
-//   return { minNumber, maxNumber, operations };
-// }
 
 function setDifficult() {
   if (score < 100) {
@@ -229,7 +197,6 @@ function createRaindrop() {
 
   const { firstNum, operator, secondNum } = generateExpression();
 
-  // Создание элементов выражения с использованием шаблонных строк
   raindrop.innerHTML = `
     <div class="num1">${firstNum}</div>
     <div class="operator">${operator}</div>
@@ -256,20 +223,26 @@ function createRaindrop() {
     createRaindrop();
   }, 3500);
 }
+//******************************************************* */
+function updateWaveRectTop() {
+  waveRect = wave.getBoundingClientRect();
+  waveRectTop = waveRect.top;
+  console.log(waveRectTop);
 
+  return waveRectTop;
+}
+
+//*********************************************************** */
 // Функция анимации падения капли
 function animateRaindrop(raindrop) {
   raindrop.classList.add("active");
   raindrop.style.transitionDuration = `${gameSpeed}s`;
-  // gameSpeed = score >= 100 ? gameSpeed - 10 : gameSpeed;//???????????????????
   let dropRect = raindrop.getBoundingClientRect();
   console.log(dropRect);
-  // Получаем позицию волны
-  let waveRect = wave.getBoundingClientRect();
-  let waveRectTop = waveRect.top;
-  console.log(waveRect.height);
+
+  waveRectTop = updateWaveRectTop();
+
   console.log(waveRectTop);
-  console.log(seaLevelHeight);
 
   // Устанавливаем top капли на уровень волны
   raindrop.style.top = waveRectTop - dropRect.height + "px";
@@ -295,14 +268,14 @@ function handleDropCollision(raindrop) {
   console.log(countAutoDrop);
 
   fellDropSound.play();
-
+  gamePlace.removeChild(raindrop);
   drops = drops.filter((dropData) => dropData.raindrop !== raindrop);
 
-  // Удаляем элемент из DOM только если он еще существует
-  if (raindrop.parentNode) {
-    raindrop.parentNode.removeChild(raindrop);
-    console.log("капля удалена");
-  }
+  // // Удаляем элемент из DOM только если он еще существует
+  // if (raindrop.parentNode) {
+  //   raindrop.parentNode.removeChild(raindrop);
+  //   console.log("капля удалена");
+  // }
 
   let currentDrop = raindrop;
   console.log(currentDrop);
@@ -362,6 +335,7 @@ function loseLife() {
 
     wave.style.height = wave.offsetHeight + seaLevelHeight + "px";
 
+    // updateWaveRectTop();
     console.log(seaLevelHeight);
     console.log(wave.offsetHeight, wave.offsetTop);
   }
