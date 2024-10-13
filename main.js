@@ -57,6 +57,8 @@ let operations;
 
 let waveRect;
 let waveRectTop;
+
+let idTimeCreateDrop;
 //===========================================================================
 // Обработчики событий
 playButton.addEventListener("click", startGame);
@@ -219,45 +221,35 @@ function createRaindrop() {
   console.log(drops);
 
   // Создаем следующую каплю с задержкой
-  setTimeoutId = setTimeout(() => {
+  idTimeCreateDrop = setTimeout(() => {
     createRaindrop();
   }, 3500);
 }
-//******************************************************* */
-function updateWaveRectTop() {
-  waveRect = wave.getBoundingClientRect();
-  waveRectTop = waveRect.top;
-  console.log(waveRectTop);
-
-  return waveRectTop;
-}
 
 //*********************************************************** */
+let idTimeDropFalse;
+
+function checkDropCollision(raindrop) {
+  if (!raindrop) return;
+  let waveTop = wave.offsetTop;
+  const dropPosition = raindrop.offsetTop + raindrop.offsetHeight;
+  // if (dropPosition >= waveTop + raindrop.offsetHeight) {
+  //   handleDropCollision(raindrop);
+  // }
+  if (dropPosition >= waveTop) {
+    handleDropCollision(raindrop);
+  }
+
+  idTimeDropFalse = setTimeout(() => {
+    checkDropCollision(raindrop);
+  }, 100);
+}
+
 // Функция анимации падения капли
 function animateRaindrop(raindrop) {
   raindrop.classList.add("active");
   raindrop.style.transitionDuration = `${gameSpeed}s`;
-  let dropRect = raindrop.getBoundingClientRect();
-  console.log(dropRect);
-
-  waveRectTop = updateWaveRectTop();
-
-  console.log(waveRectTop);
-
-  // Устанавливаем top капли на уровень волны
-  raindrop.style.top = waveRectTop - dropRect.height + "px";
-  console.log(raindrop.style.top);
-  console.log(dropRect.height);
-
-  let collisionHandled = false;
-
-  // Проверяем столкновение после завершения анимации
-  raindrop.addEventListener("transitionend", () => {
-    if (!collisionHandled) {
-      collisionHandled = true;
-      handleDropCollision(raindrop);
-    }
-  });
+  checkDropCollision(raindrop);
 
   console.log(gameSpeed);
 }
@@ -268,14 +260,14 @@ function handleDropCollision(raindrop) {
   console.log(countAutoDrop);
 
   fellDropSound.play();
-  gamePlace.removeChild(raindrop);
+  // gamePlace.removeChild(raindrop);
   drops = drops.filter((dropData) => dropData.raindrop !== raindrop);
 
   // // Удаляем элемент из DOM только если он еще существует
-  // if (raindrop.parentNode) {
-  //   raindrop.parentNode.removeChild(raindrop);
-  //   console.log("капля удалена");
-  // }
+  if (raindrop.parentNode) {
+    raindrop.parentNode.removeChild(raindrop);
+    console.log("капля удалена");
+  }
 
   let currentDrop = raindrop;
   console.log(currentDrop);
@@ -342,6 +334,8 @@ function loseLife() {
 
   if (livesCount === 0) {
     // failSound.pause();
+    clearTimeout(idTimeCreateDrop);
+    clearTimeout(idTimeDropFalse);
     hearts = [];
     endGame();
   }
@@ -434,7 +428,7 @@ function checkAnswer() {
 
 function handleCorrectAnswer(currentDrop, dropIndex) {
   rightAnswerSound.play();
-  updateScore();
+
   // Создаем анимацию брызг
   createSplash(currentDrop.raindrop);
   gamePlace.removeChild(currentDrop.raindrop);
@@ -454,6 +448,7 @@ function handleCorrectAnswer(currentDrop, dropIndex) {
     score += 10 + countRightAnswers;
     showPoints(10 + countRightAnswers, false);
   }
+  updateScore();
 }
 
 function handleWrongAnswer() {
@@ -503,15 +498,11 @@ seaSound.pause();
 //--------------------------------------------------------------------
 function endGame() {
   seaSound.pause();
-  clearTimeout(setTimeoutId);
+  clearTimeout(idTimeCreateDrop);
+  clearTimeout(idTimeDropFalse);
 
   // Удаляем все капли
   clearGamePlace();
-
-  console.log(wave.offsetHeight);
-  console.log(seaLevelHeight);
-  wave.style.height = wave.offsetHeight - seaLevelHeight + "px";
-  console.log(wave.offsetHeight);
 
   // Вывод результатов
   resultScore.textContent = score;
@@ -522,8 +513,8 @@ function endGame() {
   greetingArea.style.display = "none";
   scoreBoard.style.display = "flex";
 
-  console.log(countAutoDrop);
-  console.log(totalDropsCreated);
+  // console.log(countAutoDrop);
+  // console.log(totalDropsCreated);
 }
 
 // Функция для очистки игрового поля
