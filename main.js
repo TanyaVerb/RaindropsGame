@@ -55,10 +55,8 @@ let minNumber = 0;
 let maxNumber = 10;
 let operations;
 
-let waveRect;
-let waveRectTop;
-
 let idTimeCreateDrop;
+let idTimeDropFalse;
 //===========================================================================
 // Обработчики событий
 playButton.addEventListener("click", startGame);
@@ -73,6 +71,8 @@ function startGame() {
   errors = 0;
   drops = [];
   updateScore();
+
+  idTimeDropFalse = setInterval(checkAllDropCollisions, 100); //проверка всех капель на столкновение
 
   gameEl.style.display = "block";
   greetingArea.style.display = "none";
@@ -227,29 +227,24 @@ function createRaindrop() {
 }
 
 //*********************************************************** */
-let idTimeDropFalse;
+// Проверка столкновений для всех капель
+function checkAllDropCollisions() {
+  drops.forEach((drop) => {
+    const raindrop = drop.raindrop; // Проверяем каждую каплю
+    if (!raindrop) return;
+    let waveTop = wave.offsetTop;
+    const dropPosition = raindrop.offsetTop + raindrop.offsetHeight;
 
-function checkDropCollision(raindrop) {
-  if (!raindrop) return;
-  let waveTop = wave.offsetTop;
-  const dropPosition = raindrop.offsetTop + raindrop.offsetHeight;
-  // if (dropPosition >= waveTop + raindrop.offsetHeight) {
-  //   handleDropCollision(raindrop);
-  // }
-  if (dropPosition >= waveTop) {
-    handleDropCollision(raindrop);
-  }
-
-  idTimeDropFalse = setTimeout(() => {
-    checkDropCollision(raindrop);
-  }, 100);
+    if (dropPosition >= waveTop + (raindrop.offsetHeight * 50) / 100) {
+      handleDropCollision(raindrop);
+    }
+  });
 }
 
 // Функция анимации падения капли
 function animateRaindrop(raindrop) {
   raindrop.classList.add("active");
   raindrop.style.transitionDuration = `${gameSpeed}s`;
-  checkDropCollision(raindrop);
 
   console.log(gameSpeed);
 }
@@ -263,16 +258,16 @@ function handleDropCollision(raindrop) {
   // gamePlace.removeChild(raindrop);
   drops = drops.filter((dropData) => dropData.raindrop !== raindrop);
 
+  // Сохраняем координаты капли перед удалением
+  const dropLeft = raindrop.offsetLeft;
+  const dropTop = raindrop.offsetTop;
+
   // // Удаляем элемент из DOM только если он еще существует
   if (raindrop.parentNode) {
+    createSplash(dropLeft, dropTop);
     raindrop.parentNode.removeChild(raindrop);
     console.log("капля удалена");
   }
-
-  let currentDrop = raindrop;
-  console.log(currentDrop);
-
-  createSplash(currentDrop);
 
   score -= 13;
   if (score < 0) {
@@ -288,7 +283,7 @@ function handleDropCollision(raindrop) {
   updateScore();
 }
 
-//-------------------------------Отрисовка количества жизней(сердец)
+//----------Отрисовка количества жизней(сердец)
 
 // Устанавливаем начальное количество жизней,кот.можно менять
 let initialLives = 3;
@@ -317,26 +312,20 @@ function loseLife() {
     // Находим последний  элемент и добавляем класс "game__lose"
     let lastHeart = hearts[livesCount]; //элемент массива hearts, индекс кот. соответствует текущему кол-ву жизней.
     lastHeart.classList.add("game__lose");
-    //_________
-    // Получаем высоту волны
+
     const waveHeight = wave.offsetHeight;
     console.log(waveHeight);
 
     // Поднимаем уровень моря на 30% от высоты волны
     seaLevelHeight = waveHeight * 0.3;
-
     wave.style.height = wave.offsetHeight + seaLevelHeight + "px";
 
-    // updateWaveRectTop();
     console.log(seaLevelHeight);
     console.log(wave.offsetHeight, wave.offsetTop);
   }
 
   if (livesCount === 0) {
     // failSound.pause();
-    clearTimeout(idTimeCreateDrop);
-    clearTimeout(idTimeDropFalse);
-    hearts = [];
     endGame();
   }
 }
@@ -405,9 +394,9 @@ function handleKeyboardInput(event) {
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++
 function checkAnswer() {
-  if (gameOver) return; //
+  if (gameOver) return;
 
-  if (drops.length === 0) return; // Проверка, есть ли капли
+  if (drops.length === 0) return;
 
   const answer = parseFloat(answerInput.value); //можно Number()
 
@@ -429,8 +418,12 @@ function checkAnswer() {
 function handleCorrectAnswer(currentDrop, dropIndex) {
   rightAnswerSound.play();
 
+  // Сохраняем координаты капли перед удалением
+  const dropLeft = currentDrop.raindrop.offsetLeft;
+  const dropTop = currentDrop.raindrop.offsetTop;
+
   // Создаем анимацию брызг
-  createSplash(currentDrop.raindrop);
+  createSplash(dropLeft, dropTop);
   gamePlace.removeChild(currentDrop.raindrop);
 
   // Удаляем каплю из массива drops
@@ -476,11 +469,11 @@ function handleWrongAnswer() {
     }, 1200);
   }
 }
-function createSplash(currentDrop) {
+function createSplash(left, top) {
   const splash = document.createElement("div");
   splash.classList.add("splash");
-  splash.style.left = currentDrop.style.left;
-  splash.style.top = currentDrop.style.top;
+  splash.style.left = left + "px";
+  splash.style.top = top + "px";
   gamePlace.appendChild(splash);
 
   setTimeout(() => {
@@ -498,8 +491,9 @@ seaSound.pause();
 //--------------------------------------------------------------------
 function endGame() {
   seaSound.pause();
+  hearts = [];
   clearTimeout(idTimeCreateDrop);
-  clearTimeout(idTimeDropFalse);
+  clearInterval(idTimeDropFalse);
 
   // Удаляем все капли
   clearGamePlace();
