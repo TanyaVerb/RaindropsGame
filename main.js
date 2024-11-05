@@ -1,7 +1,7 @@
 const greetingArea = document.querySelector(".greeting");
 const gameEl = document.querySelector(".game-container");
 const gameArea = document.querySelector(".game");
-const playButton = document.querySelector(".play");
+const playButton = document.getElementById("play");
 const wave = document.querySelector(".game__wave-one");
 const gamePlace = document.querySelector(".game__place");
 const game = document.querySelector(".game");
@@ -9,6 +9,12 @@ const scoreEl = document.getElementById("score");
 const heartsContainer = document.querySelector(".game__lives-container");
 const levelDisplay = document.querySelector(".level-display");
 const fullEl = document.getElementById("full");
+const gameRulesButton = document.querySelector(".how-to-play");
+const gameRulesSection = document.querySelector(".game__instructions");
+const sliderEl = document.getElementById("slider");
+const sliderItems = Array.from(sliderEl.children);
+const btnPrev = document.getElementById("btnPrev");
+const btnNext = document.getElementById("btnNext");
 
 //-------------------------Музыка---------------------------
 const seaSound = document.getElementById("sea");
@@ -57,6 +63,8 @@ let operations;
 
 let idTimeCreateDrop;
 let idTimeDropFalse;
+
+let isGameRulesShow = false;
 //===========================================================================
 // Обработчики событий
 playButton.addEventListener("click", startGame);
@@ -74,7 +82,8 @@ function startGame() {
 
   idTimeDropFalse = setInterval(checkAllDropCollisions, 100); //проверка всех капель на столкновение
 
-  gameEl.style.display = "block";
+  gameEl.style.display = "flex";
+  gameEl.style.flexDirection = "row";
   greetingArea.style.display = "none";
   answerInput.value = "";
 
@@ -144,14 +153,19 @@ function generateExpression() {
 
   console.log(firstNum, secondNum);
 
-  const operator = operations[Math.floor(Math.random() * operations.length)];
+  let operator = operations[Math.floor(Math.random() * operations.length)];
   if ((firstNum < secondNum && operator === "-") || operator === "/") {
     [firstNum, secondNum] = [secondNum, firstNum];
   }
   if (operator === "/" && firstNum % secondNum != 0) {
     firstNum -= firstNum % secondNum; //уменьшаем первое число на остаток от деления
   }
-
+  if (isGameRulesShow === true) {
+    //изм
+    firstNum = 7;
+    secondNum = 2;
+    operator = "+";
+  }
   return { firstNum, operator, secondNum };
 }
 console.log(generateExpression());
@@ -213,12 +227,14 @@ function createRaindrop() {
     raindrop: raindrop,
     answer: raindropAnswer,
   };
+  drops.push(raindropData); //добавляем в массив капли
+  console.log(drops);
 
   // Запускаем анимацию падения
   animateRaindrop(raindrop);
 
-  drops.push(raindropData); //добавляем в массив капли
-  console.log(drops);
+  // drops.push(raindropData); //добавляем в массив капли
+  // console.log(drops);
 
   // Создаем следующую каплю с задержкой
   idTimeCreateDrop = setTimeout(() => {
@@ -286,7 +302,7 @@ function handleDropCollision(raindrop) {
 //----------Отрисовка количества жизней(сердец)
 
 // Устанавливаем начальное количество жизней,кот.можно менять
-let initialLives = 3;
+let initialLives = 3; //const?
 livesCount = initialLives; // Изначальное количество жизней
 let hearts = [];
 
@@ -506,9 +522,6 @@ function endGame() {
   gameEl.style.display = "none";
   greetingArea.style.display = "none";
   scoreBoard.style.display = "flex";
-
-  // console.log(countAutoDrop);
-  // console.log(totalDropsCreated);
 }
 
 // Функция для очистки игрового поля
@@ -557,5 +570,119 @@ function toggleScreen() {
     gameEl.requestFullscreen();
     fullEl.classList.toggle("fullscreen");
     fullEl.classList.toggle("exit-fullscreen");
+  }
+}
+//=================================Как играть=====================================
+let idShowRulesInterval1 = null;
+let active = 0;
+let idSetTimeoutCheckAnswer;
+let isIntervalRunning = false;
+
+sliderItems.forEach(function (slide) {
+  console.log(slide);
+  slide.classList.add("hidden");
+});
+
+gameRulesButton.addEventListener("click", showGameRules);
+
+function showGameRules() {
+  greetingArea.style.display = "none";
+  gameRulesSection.style.display = "flex";
+  gameEl.style.flexDirection = "row";
+  active = 0;
+
+  sliderItems[active].classList.remove("hidden");
+  btnNext.classList.add("btn-green");
+
+  showGameRules1();
+}
+
+btnNext.addEventListener("click", showSlides);
+
+function showSlides() {
+  clearGamePlace();
+  clearInterval(idShowRulesInterval1);
+  clearInterval(idTimeCreateDrop);
+  clearTimeout(idSetTimeoutCheckAnswer);
+  answerInput.value === "";
+
+  sliderItems[active].classList.add("hidden");
+
+  btnNext.classList.add("btn-green");
+  if (active + 1 !== sliderItems.length) {
+    active++;
+  } else {
+    btnNext.classList.remove("btn-green");
+  }
+  sliderItems[active].classList.remove("hidden");
+
+  console.log(active);
+  clearInterval(idShowRulesInterval1);
+
+  if (active === 0) {
+    isIntervalRunning = true;
+    showGameRules1();
+  } else {
+    isIntervalRunning = false;
+  }
+}
+
+btnPrev.addEventListener("click", () => {
+  btnPrev.classList.add("btn-green");
+  sliderItems[active].classList.add("hidden");
+  if (active - 1 < 0) {
+    active = 0;
+    btnPrev.classList.remove("btn-green");
+  } else {
+    active--;
+  }
+  sliderItems[active].classList.remove("hidden");
+  if (active === 0) {
+    showGameRules1();
+  }
+});
+
+function showGameRules1() {
+  if (active === 0) {
+    isGameRulesShow = true;
+    startGame();
+    clearInterval(idTimeCreateDrop);
+
+    setTimeout(() => {
+      const btn9 = document.querySelector('[data-num="9"]');
+      const btnEnter = document.querySelector(".enter");
+
+      if (isIntervalRunning) {
+        btn9.classList.add("press-btn");
+        setTimeout(() => {
+          btn9.classList.remove("press-btn");
+          btnEnter.classList.add("press-btn");
+        }, 500);
+
+        answerInput.value = drops[0].answer;
+      }
+
+      idSetTimeoutCheckAnswer = setTimeout(() => {
+        checkAnswer();
+        btnEnter.classList.remove("press-btn");
+      }, 600);
+    }, 6000);
+
+    if (!isIntervalRunning) {
+      isIntervalRunning = true;
+      idShowRulesInterval1 = setInterval(() => {
+        clearGamePlace();
+        livesCount = 3;
+        countRightAnswers = 0;
+        totalDropsCreated = 0;
+        showGameRules1();
+      }, 8000);
+    }
+  } else {
+    clearGamePlace();
+    clearInterval(idShowRulesInterval1);
+    clearInterval(idTimeCreateDrop);
+    clearTimeout(idSetTimeoutCheckAnswer);
+    answerInput.value === "";
   }
 }

@@ -57,6 +57,100 @@
   min-width: 310px;
   background: linear-gradient(rgb(250, 250, 253) 50%, rgb(132, 210, 230))
     no-repeat;
+  display: flex; /////
+  flex-direction: column; /////
+}
+.game__instructions {
+  //////////
+  width: 30%;
+  display: none;
+  // display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 20px;
+  gap: 20px;
+  &-title {
+    font-size: 25px;
+    margin-bottom: 20px;
+  }
+}
+.game__instructions-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  height: 50%;
+}
+.game__instructions-play {
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.game__instructions-slider-slide {
+  padding: 10px;
+}
+.game__instructions-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-size: 15px;
+}
+.btn.game__instructions-btn {
+  padding: 5px 10px;
+  color: black;
+  font-size: 15px;
+  background-color: #beb9b9;
+}
+.btn.game__instructions-btn.btn-green {
+  background-color: $bg-btn-green;
+}
+.btn.game__instructions-btn:active {
+  padding: 5px 10px;
+  color: black;
+  font-size: 15px;
+  background-color: $bg-btn-green;
+}
+
+.result-entry__key.press-btn {
+  background-color: rgba(245, 197, 135, 1);
+}
+.game__instructions-slider-slide.hidden {
+  display: none;
+}
+.game__instructions-slider-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.game__instructions-slider-slide-text {
+  font-size: 15px;
+  font-family: "Roboto", serif;
+}
+#img-bonus-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+#img-bonus {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.bonus-example {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 15px;
 }
 .game {
   width: 100%;
@@ -229,6 +323,8 @@
 .result-entry {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   width: 33%;
   height: 100vh;
   background: linear-gradient(200deg, #b6ebee, #1c51d5, #3ef5ef);
@@ -236,15 +332,15 @@
     width: 100%;
     height: 33vh;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
   }
   &__score {
     display: flex;
+    width: 80%;
     align-items: center;
+    justify-content: center;
     height: 45px;
     background: $bg-display;
-    font-size: 30px;
+    font-size: 25px;
     font-weight: 600;
     text-align: center;
     border: solid 5px $color-white;
@@ -254,8 +350,8 @@
     &::before {
       content: " \2B50 ";
       padding: 5px;
-      margin-left: 20px;
-      margin-right: 15px;
+      margin-left: 7px;
+      margin-right: 7px;
     }
     @include respond-to("middle") {
       height: 30px;
@@ -317,6 +413,7 @@
   &__calc-answer-display {
     width: 100%;
     height: 100%;
+
     background: $bg-display;
     text-align: center;
     font-size: 40px;
