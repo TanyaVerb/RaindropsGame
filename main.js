@@ -15,6 +15,7 @@ const sliderEl = document.getElementById("slider");
 const sliderItems = Array.from(sliderEl.children);
 const btnPrev = document.getElementById("btnPrev");
 const btnNext = document.getElementById("btnNext");
+const instructionPlayBtn = document.getElementById("instruction-play-btn");
 
 //-------------------------Музыка---------------------------
 const seaSound = document.getElementById("sea");
@@ -222,21 +223,15 @@ function createRaindrop() {
   let raindropAnswer = calculateExpression(firstNum, operator, secondNum); //ответ в капле в виде числа
   console.log(raindropAnswer);
 
-  // Сохраняем ответ и каплю в объекте
   const raindropData = {
     raindrop: raindrop,
     answer: raindropAnswer,
   };
-  drops.push(raindropData); //добавляем в массив капли
+  drops.push(raindropData);
   console.log(drops);
 
-  // Запускаем анимацию падения
   animateRaindrop(raindrop);
 
-  // drops.push(raindropData); //добавляем в массив капли
-  // console.log(drops);
-
-  // Создаем следующую каплю с задержкой
   idTimeCreateDrop = setTimeout(() => {
     createRaindrop();
   }, 3500);
@@ -573,26 +568,47 @@ function toggleScreen() {
   }
 }
 //=================================Как играть=====================================
+
 let idShowRulesInterval1 = null;
 let active = 0;
 let idSetTimeoutCheckAnswer;
 let isIntervalRunning = false;
+
+gameRulesButton.addEventListener("click", showGameRules);
+instructionPlayBtn.addEventListener("click", goToHome);
 
 sliderItems.forEach(function (slide) {
   console.log(slide);
   slide.classList.add("hidden");
 });
 
-gameRulesButton.addEventListener("click", showGameRules);
+function clearTimers() {
+  clearInterval(idShowRulesInterval1);
+  clearInterval(idTimeCreateDrop);
+  clearTimeout(idSetTimeoutCheckAnswer);
+}
+function goToHome() {
+  seaSound.pause();
+  answerInput.value === "";
+  countRightAnswers = 0;
+  clearGamePlace();
+  clearTimers();
+  isGameRulesShow = false; //чтобы при нажатии на play не было одинаковых примеров (7+2=9)
+  isIntervalRunning = false;
+  sliderItems.forEach(function (slide) {
+    slide.classList.add("hidden");
+  });
+
+  gameRulesSection.style.display = "none";
+  greetingArea.style.display = "flex";
+}
 
 function showGameRules() {
   greetingArea.style.display = "none";
   gameRulesSection.style.display = "flex";
   gameEl.style.flexDirection = "row";
   active = 0;
-
   sliderItems[active].classList.remove("hidden");
-  btnNext.classList.add("btn-green");
 
   showGameRules1();
 }
@@ -601,45 +617,46 @@ btnNext.addEventListener("click", showSlides);
 
 function showSlides() {
   clearGamePlace();
-  clearInterval(idShowRulesInterval1);
-  clearInterval(idTimeCreateDrop);
-  clearTimeout(idSetTimeoutCheckAnswer);
+  clearTimers();
+
   answerInput.value === "";
 
   sliderItems[active].classList.add("hidden");
-
-  btnNext.classList.add("btn-green");
-  if (active + 1 !== sliderItems.length) {
-    active++;
-  } else {
-    btnNext.classList.remove("btn-green");
+  active++;
+  if (active === sliderItems.length) {
+    active--;
   }
   sliderItems[active].classList.remove("hidden");
-
-  console.log(active);
-  clearInterval(idShowRulesInterval1);
 
   if (active === 0) {
     isIntervalRunning = true;
     showGameRules1();
   } else {
+    clearInterval(idShowRulesInterval1); //
     isIntervalRunning = false;
   }
+  updateButtonStates();
 }
 
 btnPrev.addEventListener("click", () => {
-  btnPrev.classList.add("btn-green");
+  clearGamePlace();
+  clearTimers();
+
+  answerInput.value = "";
+  isIntervalRunning = false; //////?
+
   sliderItems[active].classList.add("hidden");
-  if (active - 1 < 0) {
+  active--;
+  if (active < 0) {
     active = 0;
-    btnPrev.classList.remove("btn-green");
-  } else {
-    active--;
   }
   sliderItems[active].classList.remove("hidden");
+
   if (active === 0) {
     showGameRules1();
   }
+
+  updateButtonStates();
 });
 
 function showGameRules1() {
@@ -652,18 +669,21 @@ function showGameRules1() {
       const btn9 = document.querySelector('[data-num="9"]');
       const btnEnter = document.querySelector(".enter");
 
-      if (isIntervalRunning) {
+      if (isIntervalRunning && drops.length) {
         btn9.classList.add("press-btn");
         setTimeout(() => {
           btn9.classList.remove("press-btn");
           btnEnter.classList.add("press-btn");
         }, 500);
-
-        answerInput.value = drops[0].answer;
+        if (drops.length) {
+          answerInput.value = drops[0].answer;
+        }
       }
 
       idSetTimeoutCheckAnswer = setTimeout(() => {
-        checkAnswer();
+        if (answerInput.value) {
+          checkAnswer();
+        }
         btnEnter.classList.remove("press-btn");
       }, 600);
     }, 6000);
@@ -680,9 +700,14 @@ function showGameRules1() {
     }
   } else {
     clearGamePlace();
-    clearInterval(idShowRulesInterval1);
-    clearInterval(idTimeCreateDrop);
-    clearTimeout(idSetTimeoutCheckAnswer);
+    clearTimers();
+
     answerInput.value === "";
   }
+  updateButtonStates();
+}
+
+function updateButtonStates() {
+  btnPrev.disabled = active === 0;
+  btnNext.disabled = active === sliderItems.length - 1;
 }

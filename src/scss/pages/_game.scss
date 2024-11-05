@@ -103,10 +103,20 @@
   padding: 5px 10px;
   color: black;
   font-size: 15px;
-  background-color: #beb9b9;
+  cursor: pointer;
+  // background-color: #beb9b9;//??
 }
 .btn.game__instructions-btn.btn-green {
   background-color: $bg-btn-green;
+}
+
+#btnPrev.btn-green:disabled {
+  background-color: #beb9b9;
+  cursor: not-allowed; /* Курсор "недоступно" */
+}
+#btnNext.btn-green:disabled {
+  background-color: #beb9b9;
+  cursor: not-allowed; /* Курсор "недоступно" */
 }
 .btn.game__instructions-btn:active {
   padding: 5px 10px;
