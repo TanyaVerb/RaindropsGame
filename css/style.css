@@ -132,8 +132,8 @@
   background-position: center;
   font-size: 16px;
   top: -50px;
-  -webkit-transition: top 40s linear, opacity 40s linear;
-  transition: top 40s linear, opacity 40s linear;
+  -webkit-transition: top 10s linear, opacity 40s linear;
+  transition: top 10s linear, opacity 40s linear;
 }
 @media screen and (max-width: 768px) {
   .raindrop {
