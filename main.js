@@ -318,13 +318,16 @@ function createHearts() {
   // Удаляем все предыдущие изображения сердец
 
   heartsContainer.innerHTML = "";
+  hearts = [];
 
   for (let i = 0; i < initialLives; i++) {
     const heartImage = document.createElement("img");
     heartImage.src = "../../../img/heart.png";
     heartImage.classList.add("game__heart");
     heartsContainer.appendChild(heartImage);
+
     hearts.push(heartImage);
+    console.log(hearts);
   }
 }
 
@@ -335,6 +338,8 @@ function loseLife() {
     failSound.play();
     // Находим последний  элемент и добавляем класс "game__lose"
     let lastHeart = hearts[livesCount]; //элемент массива hearts, индекс кот. соответствует текущему кол-ву жизней.
+    console.log(lastHeart);
+
     lastHeart.classList.add("game__lose");
     console.log(lastHeart);
 
