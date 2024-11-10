@@ -52,16 +52,14 @@
 }
 .game-container {
   display: none;
-  // height: 100%;
   height: 100vh;
   min-width: 310px;
   background: linear-gradient(rgb(250, 250, 253) 50%, rgb(132, 210, 230))
     no-repeat;
-  display: flex; /////
-  flex-direction: column; /////
+  display: flex;
+  flex-direction: column;
 }
 .game__instructions {
-  //////////
   width: 30%;
   display: none;
   // display: flex;
@@ -70,59 +68,97 @@
   justify-content: space-around;
   padding: 20px;
   gap: 20px;
+
+  @include respond-to("middle") {
+    width: 20%;
+    padding: 10px;
+    gap: 10px;
+  }
+  @include respond-to("mobile") {
+    position: absolute;
+    padding-top: 20px;
+    width: 100%;
+    z-index: 100;
+    height: 70%;
+  }
+
   &-title {
     font-size: 25px;
-    margin-bottom: 20px;
+    padding: 10px;
+    @include respond-to("middle") {
+      font-size: 20px;
+    }
+    @include respond-to("mobile") {
+    }
+  }
+  &-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    height: 50%;
+    @include respond-to("mobile") {
+      height: 80%;
+      justify-content: space-between;
+    }
+  }
+  &-play {
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &-slider-slide {
+    padding: 10px;
+  }
+  &-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    font-size: 15px;
+  }
+  &-slider-slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    &-text {
+      font-size: 18px;
+      font-family: "Roboto", serif;
+      @include respond-to("middle") {
+        font-size: 12px;
+      }
+      @include respond-to("mobile") {
+      }
+    }
   }
 }
-.game__instructions-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-  width: 100%;
-  height: 50%;
-}
-.game__instructions-play {
-  height: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.game__instructions-slider-slide {
-  padding: 10px;
-}
-.game__instructions-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  font-size: 15px;
-}
+
 .btn.game__instructions-btn {
   padding: 5px 10px;
   color: black;
   font-size: 15px;
   cursor: pointer;
-  // background-color: #beb9b9;//??
+  @include respond-to("middle") {
+    font-size: 10px;
+  }
+  @include respond-to("mobile") {
+  }
 }
 .btn.game__instructions-btn.btn-green {
   background-color: $bg-btn-green;
 }
 
 #btnPrev.btn-green:disabled {
-  background-color: #beb9b9;
+  background-color: $bg-btn-disabled;
   cursor: not-allowed; /* Курсор "недоступно" */
 }
 #btnNext.btn-green:disabled {
-  background-color: #beb9b9;
+  background-color: $bg-btn-disabled;
   cursor: not-allowed; /* Курсор "недоступно" */
-}
-.btn.game__instructions-btn:active {
-  padding: 5px 10px;
-  color: black;
-  font-size: 15px;
-  background-color: $bg-btn-green;
 }
 
 .result-entry__key.press-btn {
@@ -131,17 +167,7 @@
 .game__instructions-slider-slide.hidden {
   display: none;
 }
-.game__instructions-slider-slide {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-}
-.game__instructions-slider-slide-text {
-  font-size: 15px;
-  font-family: "Roboto", serif;
-}
+
 #img-bonus-container {
   position: relative;
   width: 100px;
@@ -187,33 +213,22 @@
       height: 67vh;
     }
   }
-  &__wave-container {
-  }
+
   &__wave {
     background: url("../../../img/wave3.png");
     background-repeat: repeat-x;
     width: 200%;
-    // height: 200px;
     height: 15%;
     position: absolute;
     margin-left: -200px;
-    // margin-right: 200px;
     bottom: 0;
     left: 0;
-    @include respond-to("mobile") {
-      // height: 100px;
-    }
-    // @include respond-to("middle") {
-    //   height: 250px; //???
-    // }
   }
 
   &__wave-one {
-    // height: 15%;
     animation: waves 5s infinite linear;
   }
   &__wave-two {
-    // height: 15%;
     opacity: 0.5;
     animation: waves 10s infinite linear;
   }
@@ -291,6 +306,9 @@
     font-weight: bold;
     color: rgb(255, 0, 0);
     @include respond-to("middle") {
+    }
+    @include respond-to("mobile") {
+      font-size: 30px;
     }
   }
   &__audio-player {
@@ -483,10 +501,10 @@
 .delete-key,
 .clear,
 .enter {
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 400;
   @include respond-to("middle") {
-    font-size: 14px;
+    font-size: 12px;
     padding-right: 2px;
     padding-left: 2px;
   }
@@ -528,7 +546,7 @@
   background-image: url(../../../img/Bryzgi1.png);
   background-size: contain;
   position: absolute;
-  animation: splashAnimation 0.5s ease-out; /* Анимация длительностью 0.5 секунды */
+  animation: splashAnimation 0.5s ease-out;
   @include respond-to("mobile") {
     width: 70px;
     height: 70px;
@@ -554,11 +572,15 @@
   background-size: 100% 100%;
   filter: invert(100%);
   margin: auto;
+  @include respond-to("middle") {
+    height: 8%;
+  }
   @include respond-to("mobile") {
     width: 10%;
     margin-bottom: 5px;
   }
 }
+
 .exit-fullscreen {
   width: 30%;
   height: 10%;
@@ -567,6 +589,9 @@
   background-size: 100% 100%;
   filter: invert(100%);
   margin: auto;
+  @include respond-to("middle") {
+    height: 8%;
+  }
   @include respond-to("mobile") {
     width: 10%;
     margin-bottom: 5px;

@@ -8,9 +8,10 @@
   min-width: 320px;
 
   &__continue {
-    margin: auto;
+    align-self: center;
     margin-top: 60px;
     background: $bg-btn-green;
+
     &:hover {
       background: rgb(41, 158, 67);
     }

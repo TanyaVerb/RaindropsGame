@@ -213,11 +213,31 @@
   padding: 20px;
   gap: 20px;
 }
+@media screen and (max-width: 768px) {
+  .game__instructions {
+    width: 20%;
+    padding: 10px;
+    gap: 10px;
+  }
+}
+@media screen and (max-width: 480px) {
+  .game__instructions {
+    position: absolute;
+    padding-top: 20px;
+    width: 100%;
+    z-index: 100;
+    height: 70%;
+  }
+}
 .game__instructions-title {
   font-size: 25px;
-  margin-bottom: 20px;
+  padding: 10px;
 }
-
+@media screen and (max-width: 768px) {
+  .game__instructions-title {
+    font-size: 20px;
+  }
+}
 .game__instructions-content {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -234,7 +254,14 @@
   width: 100%;
   height: 50%;
 }
-
+@media screen and (max-width: 480px) {
+  .game__instructions-content {
+    height: 80%;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+  }
+}
 .game__instructions-play {
   height: 50%;
   display: -webkit-box;
@@ -247,11 +274,9 @@
       -ms-flex-pack: center;
           justify-content: center;
 }
-
 .game__instructions-slider-slide {
   padding: 10px;
 }
-
 .game__instructions-controls {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -265,43 +290,6 @@
   width: 100%;
   font-size: 15px;
 }
-
-.btn.game__instructions-btn {
-  padding: 5px 10px;
-  color: black;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.btn.game__instructions-btn.btn-green {
-  background-color: rgb(63, 211, 95);
-}
-
-#btnPrev.btn-green:disabled {
-  background-color: #beb9b9;
-  cursor: not-allowed; /* Курсор "недоступно" */
-}
-
-#btnNext.btn-green:disabled {
-  background-color: #beb9b9;
-  cursor: not-allowed; /* Курсор "недоступно" */
-}
-
-.btn.game__instructions-btn:active {
-  padding: 5px 10px;
-  color: black;
-  font-size: 15px;
-  background-color: rgb(63, 211, 95);
-}
-
-.result-entry__key.press-btn {
-  background-color: rgb(245, 197, 135);
-}
-
-.game__instructions-slider-slide.hidden {
-  display: none;
-}
-
 .game__instructions-slider-slide {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -318,10 +306,46 @@
           justify-content: center;
   gap: 20px;
 }
-
 .game__instructions-slider-slide-text {
-  font-size: 15px;
+  font-size: 18px;
   font-family: "Roboto", serif;
+}
+@media screen and (max-width: 768px) {
+  .game__instructions-slider-slide-text {
+    font-size: 12px;
+  }
+}
+.btn.game__instructions-btn {
+  padding: 5px 10px;
+  color: black;
+  font-size: 15px;
+  cursor: pointer;
+}
+@media screen and (max-width: 768px) {
+  .btn.game__instructions-btn {
+    font-size: 10px;
+  }
+}
+.btn.game__instructions-btn.btn-green {
+  background-color: rgb(63, 211, 95);
+}
+
+#btnPrev.btn-green:disabled {
+  background-color: #beb9b9;
+  cursor: not-allowed; /* Курсор "недоступно" */
+}
+
+#btnNext.btn-green:disabled {
+  background-color: #beb9b9;
+  cursor: not-allowed; /* Курсор "недоступно" */
+}
+
+.result-entry__key.press-btn {
+  background-color: rgb(245, 197, 135);
+}
+
+.game__instructions-slider-slide.hidden {
+  display: none;
 }
 
 #img-bonus-container {
@@ -509,6 +533,11 @@
   font-size: 48px;
   font-weight: bold;
   color: rgb(255, 0, 0);
+}
+@media screen and (max-width: 480px) {
+  .game__points {
+    font-size: 30px;
+  }
 }
 @-webkit-keyframes waves {
   0% {
@@ -764,14 +793,14 @@
 .delete-key,
 .clear,
 .enter {
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 400;
 }
 @media screen and (max-width: 768px) {
   .delete-key,
   .clear,
   .enter {
-    font-size: 14px;
+    font-size: 12px;
     padding-right: 2px;
     padding-left: 2px;
   }
@@ -817,7 +846,7 @@
   background-size: contain;
   position: absolute;
   -webkit-animation: splashAnimation 0.5s ease-out;
-          animation: splashAnimation 0.5s ease-out; /* Анимация длительностью 0.5 секунды */
+          animation: splashAnimation 0.5s ease-out;
 }
 @media screen and (max-width: 480px) {
   .splash {
@@ -861,6 +890,11 @@
           filter: invert(100%);
   margin: auto;
 }
+@media screen and (max-width: 768px) {
+  .fullscreen {
+    height: 8%;
+  }
+}
 @media screen and (max-width: 480px) {
   .fullscreen {
     width: 10%;
@@ -877,6 +911,11 @@
   -webkit-filter: invert(100%);
           filter: invert(100%);
   margin: auto;
+}
+@media screen and (max-width: 768px) {
+  .exit-fullscreen {
+    height: 8%;
+  }
 }
 @media screen and (max-width: 480px) {
   .exit-fullscreen {
@@ -900,7 +939,8 @@
   min-width: 320px;
 }
 .score-board__continue {
-  margin: auto;
+  -ms-flex-item-align: center;
+      align-self: center;
   margin-top: 60px;
   background: rgb(63, 211, 95);
 }
@@ -1003,20 +1043,22 @@ html {
 }
 
 .wrapper {
-  width: auto;
   max-width: 1000px;
   min-width: 320px;
   height: 100vh;
   margin: 0 auto;
-  overflow: hidden;
 }
 
 @media (max-width: 853px) {
   .wrapper {
-    max-width: 700px;
+    max-width: 800px;
   }
 }
-/* Адаптивные стили */
+@media (max-width: 768px) {
+  .wrapper {
+    max-width: 750px;
+  }
+}
 @media (max-width: 480px) {
   .wrapper {
     max-width: 400px;
@@ -1042,12 +1084,17 @@ html {
   -webkit-transform: scale(0.97);
           transform: scale(0.97);
 }
+@media screen and (max-width: 768px) {
+  .btn {
+    font-size: 15px;
+    padding: 10px 20px;
+  }
+}
 @media screen and (max-width: 480px) {
   .btn {
     -webkit-box-pack: center;
         -ms-flex-pack: center;
             justify-content: center;
-    font-size: 20px;
     padding: 10px 10px;
   }
 }/*# sourceMappingURL=style.css.map */

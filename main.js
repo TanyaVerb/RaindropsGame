@@ -68,6 +68,8 @@ let idTimeDropFalse;
 
 let isGameRulesShow = false;
 let isGameRulesShowTwo = false;
+let isGameRulesShowThree = false;
+
 //===========================================================================
 // Обработчики событий
 playButton.addEventListener("click", startGame);
@@ -78,9 +80,9 @@ const initialLives = 3;
 let hearts = [];
 
 function startGame() {
-  livesCount = initialLives; // Изначальное количество жизней
-
   seaSound.play();
+
+  livesCount = initialLives; // Изначальное количество жизней
   createHearts();
   // Очищаем поле и переменные
   score = 0;
@@ -93,10 +95,10 @@ function startGame() {
   gameEl.style.display = "flex";
   gameEl.style.flexDirection = "row";
   greetingArea.style.display = "none";
+
   answerInput.value = "";
 
   initialWaveHeight = wave.offsetHeight; // Сохраняем начальную высоту волны
-  console.log(initialWaveHeight);
 
   // Создаем первую каплю при запуске игры
   createRaindrop();
@@ -116,8 +118,6 @@ function showPoints(points, isMinus) {
   }, 2000);
 }
 
-//________________________
-
 function generateRandomNumber(minNumber, maxNumber) {
   return Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 }
@@ -126,7 +126,10 @@ function setDifficult() {
   if (score < 100) {
     minNumber = 0;
     maxNumber = 10;
-    isGameRulesShowTwo ? (gameSpeed = 10) : 40; ////????
+    isGameRulesShowTwo ? (gameSpeed = 10) : 40;
+    if (isGameRulesShowThree) {
+      gameSpeed = 70;
+    }
     operations = ["+", "-"];
     levelDisplay.textContent = "Level: 1";
   } else if (score > 100 && score < 200) {
@@ -155,7 +158,7 @@ function setDifficult() {
 
 // Создание выражения
 function generateExpression() {
-  const { minNumber, maxNumber, operations } = setDifficult(); // Устанавливаем уровень сложности перед генерацией
+  const { minNumber, maxNumber, operations } = setDifficult();
   let firstNum = generateRandomNumber(minNumber, maxNumber);
   let secondNum = generateRandomNumber(minNumber, maxNumber);
 
@@ -169,10 +172,14 @@ function generateExpression() {
     firstNum -= firstNum % secondNum; //уменьшаем первое число на остаток от деления
   }
   if (isGameRulesShow === true) {
-    //изм
     firstNum = 7;
     secondNum = 2;
     operator = "+";
+  }
+  if (isGameRulesShowThree === true && totalDropsCreated % 5 === 0) {
+    firstNum = 18;
+    secondNum = 2;
+    operator = "/";
   }
   return { firstNum, operator, secondNum };
 }
@@ -238,12 +245,21 @@ function createRaindrop() {
 
   animateRaindrop(raindrop);
 
-  idTimeCreateDrop = setTimeout(() => {
-    createRaindrop();
-  }, 3500);
+  idTimeCreateDrop = setTimeout(
+    () => {
+      createRaindrop();
+    },
+
+    isGameRulesShowTwo || isGameRulesShowThree ? 1000 : 3500
+  );
 
   if (isGameRulesShowTwo) {
     if (drops.length === 3) {
+      clearTimeout(idTimeCreateDrop);
+    }
+  }
+  if (isGameRulesShowThree) {
+    if (drops.length === 5) {
       clearTimeout(idTimeCreateDrop);
     }
   }
@@ -264,22 +280,17 @@ function checkAllDropCollisions() {
   });
 }
 
-// Функция анимации падения капли
 function animateRaindrop(raindrop) {
   raindrop.classList.add("active");
   gameSpeed = setDifficult();
   raindrop.style.transitionDuration = `${gameSpeed}s`;
-
-  console.log(gameSpeed);
 }
 
 // Обработка столкновения
 function handleDropCollision(raindrop) {
   countAutoDrop++;
-  console.log(countAutoDrop);
-
   fellDropSound.play();
-  // gamePlace.removeChild(raindrop);
+
   drops = drops.filter((dropData) => dropData.raindrop !== raindrop);
 
   // Сохраняем координаты капли перед удалением
@@ -290,7 +301,6 @@ function handleDropCollision(raindrop) {
   if (raindrop.parentNode) {
     createSplash(dropLeft, dropTop);
     raindrop.parentNode.removeChild(raindrop);
-    console.log("капля удалена");
   }
 
   score -= 13;
@@ -307,16 +317,9 @@ function handleDropCollision(raindrop) {
   updateScore();
 }
 
-//----------Отрисовка количества жизней(сердец)
-
-// Устанавливаем начальное количество жизней,кот.можно менять
-// let initialLives = 3; //const?
-// livesCount = initialLives; // Изначальное количество жизней
-// let hearts = [];
-
+//----------Отрисовка количества жизней(сердец)--------------------------
 function createHearts() {
   // Удаляем все предыдущие изображения сердец
-
   heartsContainer.innerHTML = "";
   hearts = [];
 
@@ -328,6 +331,7 @@ function createHearts() {
 
     hearts.push(heartImage);
     console.log(hearts);
+    console.log(heartsContainer);
   }
 }
 
@@ -338,24 +342,15 @@ function loseLife() {
     failSound.play();
     // Находим последний  элемент и добавляем класс "game__lose"
     let lastHeart = hearts[livesCount]; //элемент массива hearts, индекс кот. соответствует текущему кол-ву жизней.
-    console.log(lastHeart);
-
     lastHeart.classList.add("game__lose");
-    console.log(lastHeart);
 
     const waveHeight = wave.offsetHeight;
-    console.log(waveHeight);
-
     // Поднимаем уровень моря на 30% от высоты волны
     seaLevelHeight = waveHeight * 0.3;
     wave.style.height = wave.offsetHeight + seaLevelHeight + "px";
-
-    console.log(seaLevelHeight);
-    console.log(wave.offsetHeight, wave.offsetTop);
   }
 
   if (livesCount === 0) {
-    // failSound.pause();
     isGameRulesShowTwo ? showGameOver() : endGame();
   }
 }
@@ -406,7 +401,6 @@ function handleKeyboardInput(event) {
   // Ввод цифры
   if (event.key >= "0" && event.key <= "9") {
     answerInput.value += event.key;
-    console.log(answerInput.value);
   }
 
   // Удаление последней цифры (Delete)
@@ -508,7 +502,7 @@ function createSplash(left, top) {
 
   setTimeout(() => {
     gamePlace.removeChild(splash);
-  }, 500); // - время анимации брызг
+  }, 500);
 }
 
 // Обновляет счет в игре
@@ -590,17 +584,21 @@ function toggleScreen() {
 
 let idShowRulesInterval1 = null;
 let idShowRulesInterval2 = null;
+let idShowRulesInterval3 = null;
 let active = 0;
 let idSetTimeoutCheckAnswer;
 let isIntervalRunning = false;
 let isIntervalRunning2 = false;
+let isIntervalRunning3 = false;
 let isGameOver = false;
+
+const btn9 = document.querySelector('[data-num="9"]');
+const btnEnter = document.querySelector(".enter");
 
 gameRulesButton.addEventListener("click", showGameRules);
 instructionPlayBtn.addEventListener("click", goToHome);
 
 sliderItems.forEach(function (slide) {
-  console.log(slide);
   slide.classList.add("hidden");
 });
 
@@ -609,6 +607,7 @@ function clearTimers() {
   clearInterval(idTimeCreateDrop);
   clearTimeout(idSetTimeoutCheckAnswer);
   clearInterval(idShowRulesInterval2);
+  clearInterval(idShowRulesInterval3);
 }
 function goToHome() {
   seaSound.pause();
@@ -616,11 +615,13 @@ function goToHome() {
   clearGamePlace();
   clearTimers();
   reset();
-  active === null; //????
+
   isGameRulesShow = false; //чтобы при нажатии на play не было одинаковых примеров (7+2=9)
-  isGameRulesShowTwo = false; //
+  isGameRulesShowTwo = false; // -//-
+  isGameRulesShowThree = false; // -//-
   isIntervalRunning = false;
   isIntervalRunning2 = false;
+  isIntervalRunning3 = false;
   isGameOver = false;
 
   sliderItems.forEach(function (slide) {
@@ -666,7 +667,7 @@ function showSlides() {
   } else if (active === 1) {
     showGameRules2();
   } else if (active === 2) {
-    // showGameRules3();
+    showGameRules3();
   }
   updateButtonStates();
 }
@@ -704,9 +705,6 @@ function showGameRules1() {
     clearInterval(idTimeCreateDrop);
 
     setTimeout(() => {
-      const btn9 = document.querySelector('[data-num="9"]');
-      const btnEnter = document.querySelector(".enter");
-
       if (isIntervalRunning && drops.length) {
         btn9.classList.add("press-btn");
         setTimeout(() => {
@@ -745,24 +743,22 @@ function showGameRules1() {
   updateButtonStates();
 }
 //----------------------------2--------------------------
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 function showGameRules2() {
   clearTimers();
   if (active === 1) {
     isGameRulesShow = false;
     isGameRulesShowTwo = true;
+    isGameRulesShowThree = false;
     isIntervalRunning2 = false; //чтобы функция повторялась!!!
-    startGame();
 
-    console.log(livesCount);
+    startGame();
 
     if (drops.length === 3) {
       clearInterval(idTimeCreateDrop);
-
       showGameOver();
     }
-    console.log(livesCount);
+
     if (!isIntervalRunning2) {
       isIntervalRunning2 = true;
       idShowRulesInterval2 = setInterval(() => {
@@ -770,11 +766,10 @@ function showGameRules2() {
         reset();
 
         showGameRules2();
-      }, 20000);
+      }, 12000);
     }
   } else {
     clearInterval(idShowRulesInterval2);
-    // clearTimers();
   }
 }
 
@@ -798,6 +793,53 @@ function showGameOver() {
   setTimeout(() => {
     gameOverEl.remove();
   }, 2000);
+}
+
+//============================== 3 ==================================
+let idSetTimeoutCheckAnswer3; //можно удалить
+function showGameRules3() {
+  clearTimers();
+
+  if (active === 2) {
+    isGameRulesShowTwo = false;
+    isGameRulesShowThree = true;
+    isIntervalRunning3 = false;
+
+    startGame();
+
+    setTimeout(() => {
+      if (isIntervalRunning3 && drops.length === 5) {
+        btn9.classList.add("press-btn");
+        setTimeout(() => {
+          btn9.classList.remove("press-btn");
+          btnEnter.classList.add("press-btn");
+        }, 500);
+        if (drops.length === 5) {
+          answerInput.value = drops[4].answer;
+        }
+      }
+
+      idSetTimeoutCheckAnswer3 = setTimeout(() => {
+        if (answerInput.value) {
+          checkAnswer();
+        }
+        btnEnter.classList.remove("press-btn");
+      }, 600);
+    }, 6500);
+
+    if (!isIntervalRunning3) {
+      isIntervalRunning3 = true;
+
+      idShowRulesInterval3 = setInterval(() => {
+        clearGamePlace();
+        reset();
+        showGameRules3();
+      }, 7200);
+    }
+  } else {
+    clearGamePlace();
+    clearTimers();
+  }
 }
 
 function reset() {
