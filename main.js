@@ -30,6 +30,8 @@ const answerInput = document.querySelector(
 );
 const resultEntryEl = document.querySelector(".result-entry");
 const keyboardEl = document.querySelector(".result-entry__calc-keyboard");
+
+const calculatorButtons = document.querySelectorAll(".result-entry__key");
 keyboardEl.addEventListener("click", handlerCalcOnMouse);
 window.addEventListener("keydown", handleKeyboardInput);
 
@@ -43,28 +45,32 @@ const resultRightAnswers = document.querySelector(
 const resultWrongAnswers = document.querySelector(
   ".score-board__result-wrong-answers"
 );
-//============================Переменные и константы==========================
+//======================Переменные и константы==========================
 let countAutoDrop = 0;
 let countRightAnswers = 0;
 
 const maxErrors = 3; // Максимальное количество ошибок
 let score = 0;
 let errors = 0;
+const initialLives = 3;
+let livesCount;
+let hearts = [];
 
 let seaLevelHeight = 0;
 let initialWaveHeight;
-let gameSpeed = 40; //скорость падения капли
+const initialGameSpeed = 40;
+let gameSpeed = initialGameSpeed; //скорость падения капли
 
 let drops = []; // массив капель
 let raindropAnswers = []; //массив ответов
-let gameOver = false;
+let isGameOver = false;
 let minNumber = 0;
 let maxNumber = 10;
 let operations;
 let totalDropsCreated = 0;
 
 let idTimeCreateDrop;
-let idTimeDropFalse;
+let dropCollisionIntervalId;
 
 let isGameRulesShow = false;
 let isGameRulesShowTwo = false;
@@ -76,27 +82,28 @@ playButton.addEventListener("click", startGame);
 continueButton.addEventListener("click", continueGame);
 fullEl.addEventListener("click", toggleScreen);
 //==========================================================================
-const initialLives = 3;
-let hearts = [];
 
 function startGame() {
   seaSound.play();
+  resetGame();
 
-  livesCount = initialLives; // Изначальное количество жизней
-  createHearts();
-  // Очищаем поле и переменные
-  score = 0;
-  errors = 0;
-  drops = [];
-  updateScore();
+  if (isGameRulesShow || isGameRulesShowTwo || isGameRulesShowThree) {
+    calculatorButtons.forEach((btn) => {
+      btn.style.cursor = "not-allowed";
+    });
+    answerInput.disabled = true;
+  } else {
+    calculatorButtons.forEach((btn) => {
+      btn.style.cursor = "pointer";
+    });
+    answerInput.disabled = false;
+  }
 
-  idTimeDropFalse = setInterval(checkAllDropCollisions, 100); //проверка всех капель на столкновение
+  dropCollisionIntervalId = setInterval(checkAllDropCollisions, 100); //проверка всех капель на столкновение
 
   gameEl.style.display = "flex";
   gameEl.style.flexDirection = "row";
   greetingArea.style.display = "none";
-
-  answerInput.value = "";
 
   initialWaveHeight = wave.offsetHeight; // Сохраняем начальную высоту волны
 
@@ -115,7 +122,7 @@ function showPoints(points, isMinus) {
 
   setTimeout(() => {
     scoreEl.remove();
-  }, 2000);
+  }, 1000);
 }
 
 function generateRandomNumber(minNumber, maxNumber) {
@@ -126,10 +133,7 @@ function setDifficult() {
   if (score < 100) {
     minNumber = 0;
     maxNumber = 10;
-    isGameRulesShowTwo ? (gameSpeed = 10) : 40;
-    if (isGameRulesShowThree) {
-      gameSpeed = 70;
-    }
+    isGameRulesShowTwo || isGameRulesShowThree ? (gameSpeed = 10) : 40;
     operations = ["+", "-"];
     levelDisplay.textContent = "Level: 1";
   } else if (score > 100 && score < 200) {
@@ -151,7 +155,7 @@ function setDifficult() {
     gameSpeed = 10;
     levelDisplay.textContent = "Level: 4";
   }
-  console.log({ minNumber, maxNumber, operations });
+  console.log(gameSpeed);
 
   return { minNumber, maxNumber, operations, gameSpeed };
 }
@@ -162,9 +166,8 @@ function generateExpression() {
   let firstNum = generateRandomNumber(minNumber, maxNumber);
   let secondNum = generateRandomNumber(minNumber, maxNumber);
 
-  console.log(firstNum, secondNum);
-
   let operator = operations[Math.floor(Math.random() * operations.length)];
+
   if ((firstNum < secondNum && operator === "-") || operator === "/") {
     [firstNum, secondNum] = [secondNum, firstNum];
   }
@@ -183,23 +186,18 @@ function generateExpression() {
   }
   return { firstNum, operator, secondNum };
 }
-console.log(generateExpression());
+
 //----------------------------------
 function calculateExpression(firstNum, operator, secondNum) {
   // Выполняем операцию
   switch (operator) {
     case "+":
-      console.log(firstNum + secondNum);
-
       return firstNum + secondNum;
     case "-":
-      console.log(firstNum - secondNum);
       return firstNum - secondNum;
     case "*":
-      console.log(firstNum * secondNum);
       return firstNum * secondNum;
     case "/":
-      console.log(firstNum / secondNum);
       return firstNum / secondNum;
   }
 }
@@ -234,7 +232,6 @@ function createRaindrop() {
   `;
 
   let raindropAnswer = calculateExpression(firstNum, operator, secondNum); //ответ в капле в виде числа
-  console.log(raindropAnswer);
 
   const raindropData = {
     raindrop: raindrop,
@@ -282,7 +279,7 @@ function checkAllDropCollisions() {
 
 function animateRaindrop(raindrop) {
   raindrop.classList.add("active");
-  gameSpeed = setDifficult();
+  let { gameSpeed } = setDifficult();
   raindrop.style.transitionDuration = `${gameSpeed}s`;
 }
 
@@ -297,11 +294,8 @@ function handleDropCollision(raindrop) {
   const dropLeft = raindrop.offsetLeft;
   const dropTop = raindrop.offsetTop;
 
-  // // Удаляем элемент из DOM только если он еще существует
-  if (raindrop.parentNode) {
-    createSplash(dropLeft, dropTop);
-    raindrop.parentNode.removeChild(raindrop);
-  }
+  createSplash(dropLeft, dropTop);
+  raindrop.remove();
 
   score -= 13;
   if (score < 0) {
@@ -326,12 +320,11 @@ function createHearts() {
   for (let i = 0; i < initialLives; i++) {
     const heartImage = document.createElement("img");
     heartImage.src = "../../../img/heart.png";
+    heartImage.alt = "heart";
     heartImage.classList.add("game__heart");
     heartsContainer.appendChild(heartImage);
 
     hearts.push(heartImage);
-    console.log(hearts);
-    console.log(heartsContainer);
   }
 }
 
@@ -340,7 +333,7 @@ function loseLife() {
     livesCount--;
 
     failSound.play();
-    // Находим последний  элемент и добавляем класс "game__lose"
+
     let lastHeart = hearts[livesCount]; //элемент массива hearts, индекс кот. соответствует текущему кол-ву жизней.
     lastHeart.classList.add("game__lose");
 
@@ -365,7 +358,6 @@ function deleteLastChar() {
 }
 
 function printNumbersScreen(numbersBtn) {
-  // Получаем текущее значение на экране калькулятора
   let currentScreenValue = answerInput.value;
   // Добавляем введенное число к текущему значению
   answerInput.value = currentScreenValue + numbersBtn;
@@ -374,7 +366,6 @@ function printNumbersScreen(numbersBtn) {
 //-------------------------
 
 function handlerCalcOnMouse(e) {
-  e.stopPropagation();
   let numbersBtn = e.target.getAttribute("data-num");
   let funcBtn = e.target.getAttribute("data-func");
   if (funcBtn || numbersBtn) {
@@ -403,12 +394,10 @@ function handleKeyboardInput(event) {
     answerInput.value += event.key;
   }
 
-  // Удаление последней цифры (Delete)
   if (event.key === "Delete") {
     deleteLastChar();
   }
 
-  // Очистка поля (Clear)
   if (event.key === "Escape") {
     clearDisplayValue();
   }
@@ -418,43 +407,39 @@ function handleKeyboardInput(event) {
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++
 function checkAnswer() {
-  if (gameOver) return;
-
+  if (isGameOver) return;
   if (drops.length === 0) return;
+  if (answerInput.value === "") return;
 
-  const answer = parseFloat(answerInput.value); //можно Number()
+  const answer = Number(answerInput.value);
 
   // Проверяем, совпадает ли введенный ответ с ответом хотя бы одной из капель
-  const matchingDrop = drops.find((drop) => drop.answer === answer);
-  console.log(matchingDrop);
+  const matchingDropObject = drops.find((drop) => drop.answer === answer);
+  console.log(matchingDropObject);
 
-  if (matchingDrop) {
-    if (answer === matchingDrop.answer) {
-      handleCorrectAnswer(matchingDrop, drops.indexOf(matchingDrop));
-    } else {
-      handleWrongAnswer();
-    }
+  if (matchingDropObject) {
+    handleCorrectAnswer(matchingDropObject, drops.indexOf(matchingDropObject));
   } else {
     handleWrongAnswer();
   }
 }
 
-function handleCorrectAnswer(currentDrop, dropIndex) {
+function handleCorrectAnswer(matchingDropObject, dropIndex) {
   rightAnswerSound.play();
 
   // Сохраняем координаты капли перед удалением
-  const dropLeft = currentDrop.raindrop.offsetLeft;
-  const dropTop = currentDrop.raindrop.offsetTop;
+  const dropLeft = matchingDropObject.raindrop.offsetLeft;
+  const dropTop = matchingDropObject.raindrop.offsetTop;
 
   // Создаем анимацию брызг
   createSplash(dropLeft, dropTop);
-  gamePlace.removeChild(currentDrop.raindrop);
+  gamePlace.removeChild(matchingDropObject.raindrop);
 
   // Удаляем каплю из массива drops
   drops.splice(dropIndex, 1);
   answerInput.value = "";
 
-  if (currentDrop.raindrop.classList.contains("bonus-drop")) {
+  if (matchingDropObject.raindrop.classList.contains("bonus-drop")) {
     clearGamePlace();
     answerInput.value = "";
     countRightAnswers += 1;
@@ -489,7 +474,7 @@ function handleWrongAnswer() {
   if (errors >= maxErrors) {
     setTimeout(() => {
       endGame();
-      gameOver = true;
+      isGameOver = true;
     }, 1200);
   }
 }
@@ -516,8 +501,7 @@ seaSound.pause();
 function endGame() {
   seaSound.pause();
   hearts = [];
-  clearTimeout(idTimeCreateDrop);
-  clearInterval(idTimeDropFalse);
+  clearTimers();
 
   // Удаляем все капли
   clearGamePlace();
@@ -546,25 +530,10 @@ function clearGamePlace() {
 function continueGame() {
   scoreBoard.style.display = "none";
   greetingArea.style.display = "flex";
-
-  livesCount = 3;
-
-  countRightAnswers = 0;
-  totalDropsCreated = 0;
-  countAutoDrop = 0;
-
-  console.log(hearts);
-  hearts.forEach((heart) => {
-    heart.classList.remove("game__lose");
-  });
-
-  // Сбрасываем высоту волны к исходному значению
-  seaLevelHeight = 0;
-  wave.style.height = initialWaveHeight + "px";
   startGame();
 }
 
-//********************************Fullscreen*********************************/
+//******************************Fullscreen*********************************/
 
 function toggleScreen() {
   // Проверяем, включен ли полноэкранный режим
@@ -580,17 +549,18 @@ function toggleScreen() {
     fullEl.classList.toggle("exit-fullscreen");
   }
 }
-//============================Как играть=====================================
+//========================Как играть==================================
 
 let idShowRulesInterval1 = null;
 let idShowRulesInterval2 = null;
 let idShowRulesInterval3 = null;
 let active = 0;
 let idSetTimeoutCheckAnswer;
+let idSetTimeoutShowGameOver;
 let isIntervalRunning = false;
 let isIntervalRunning2 = false;
 let isIntervalRunning3 = false;
-let isGameOver = false;
+let isTextGameOver = false;
 
 const btn9 = document.querySelector('[data-num="9"]');
 const btnEnter = document.querySelector(".enter");
@@ -602,19 +572,12 @@ sliderItems.forEach(function (slide) {
   slide.classList.add("hidden");
 });
 
-function clearTimers() {
-  clearInterval(idShowRulesInterval1);
-  clearInterval(idTimeCreateDrop);
-  clearTimeout(idSetTimeoutCheckAnswer);
-  clearInterval(idShowRulesInterval2);
-  clearInterval(idShowRulesInterval3);
-}
 function goToHome() {
   seaSound.pause();
   answerInput.value === "";
   clearGamePlace();
   clearTimers();
-  reset();
+  resetGame();
 
   isGameRulesShow = false; //чтобы при нажатии на play не было одинаковых примеров (7+2=9)
   isGameRulesShowTwo = false; // -//-
@@ -622,7 +585,7 @@ function goToHome() {
   isIntervalRunning = false;
   isIntervalRunning2 = false;
   isIntervalRunning3 = false;
-  isGameOver = false;
+  isTextGameOver = false;
 
   sliderItems.forEach(function (slide) {
     slide.classList.add("hidden");
@@ -638,8 +601,9 @@ function showGameRules() {
   gameEl.style.flexDirection = "row";
   active = 0;
   sliderItems[active].classList.remove("hidden");
+  isGameRulesShow = true;
 
-  reset();
+  resetGame();
   showGameRules1();
 }
 //================================================================
@@ -655,10 +619,9 @@ function showSlides() {
   }
   sliderItems[active].classList.remove("hidden");
 
-  // Очистка интервалов и сброс переменных при переходе слайдов
   clearGamePlace();
   clearTimers();
-  reset();
+  resetGame();
   isIntervalRunning = false;
   isIntervalRunning2 = false;
 
@@ -671,15 +634,13 @@ function showSlides() {
   }
   updateButtonStates();
 }
-//============================================================================
+//=====================================================================
 btnPrev.addEventListener("click", () => {
   clearGamePlace();
   clearTimers();
-  reset();
+  resetGame();
   isIntervalRunning = false;
   isIntervalRunning2 = false;
-
-  answerInput.value = "";
 
   sliderItems[active].classList.add("hidden");
   active--;
@@ -697,7 +658,7 @@ btnPrev.addEventListener("click", () => {
 
   updateButtonStates();
 });
-//=============================================================================
+//==================================================================
 function showGameRules1() {
   if (active === 0) {
     isGameRulesShow = true;
@@ -710,7 +671,7 @@ function showGameRules1() {
         setTimeout(() => {
           btn9.classList.remove("press-btn");
           btnEnter.classList.add("press-btn");
-        }, 500);
+        }, 1500);
         if (drops.length) {
           answerInput.value = drops[0].answer;
         }
@@ -721,16 +682,14 @@ function showGameRules1() {
           checkAnswer();
         }
         btnEnter.classList.remove("press-btn");
-      }, 600);
+      }, 1700);
     }, 3000);
 
     if (!isIntervalRunning) {
       isIntervalRunning = true;
       idShowRulesInterval1 = setInterval(() => {
         clearGamePlace();
-        livesCount = 3;
-        countRightAnswers = 0;
-        totalDropsCreated = 0;
+        resetGame();
         showGameRules1();
       }, 5000);
     }
@@ -763,7 +722,7 @@ function showGameRules2() {
       isIntervalRunning2 = true;
       idShowRulesInterval2 = setInterval(() => {
         clearGamePlace();
-        reset();
+        resetGame();
 
         showGameRules2();
       }, 12000);
@@ -774,16 +733,16 @@ function showGameRules2() {
 }
 
 function updateButtonStates() {
-  btnPrev.disabled = active === 0;
-  btnNext.disabled = active === sliderItems.length - 1;
+  btnPrev.disabled = active === 0 ? true : false;
+  btnNext.disabled = active === sliderItems.length - 1 ? true : false;
 }
 
 function showGameOver() {
-  isGameOver = true;
+  isTextGameOver = true;
   isGameRulesShow = false;
   isIntervalRunning2 = true;
   let gameOverEl = document.createElement("p");
-  setTimeout(() => {
+  idSetTimeoutShowGameOver = setTimeout(() => {
     gameOverEl.classList.add("game__points");
     gamePlace.appendChild(gameOverEl);
     gameOverEl.textContent = "Game over";
@@ -796,14 +755,15 @@ function showGameOver() {
 }
 
 //============================== 3 ==================================
-let idSetTimeoutCheckAnswer3; //можно удалить
+let idSetTimeoutCheckAnswer3;
 function showGameRules3() {
   clearTimers();
 
   if (active === 2) {
     isGameRulesShowTwo = false;
-    isGameRulesShowThree = true;
     isIntervalRunning3 = false;
+    isTextGameOver = false;
+    isGameRulesShowThree = true;
 
     startGame();
 
@@ -832,7 +792,7 @@ function showGameRules3() {
 
       idShowRulesInterval3 = setInterval(() => {
         clearGamePlace();
-        reset();
+        resetGame();
         showGameRules3();
       }, 7200);
     }
@@ -842,11 +802,38 @@ function showGameRules3() {
   }
 }
 
-function reset() {
+function clearTimers() {
+  clearInterval(idShowRulesInterval1);
+  clearInterval(idTimeCreateDrop);
+  clearTimeout(idSetTimeoutCheckAnswer);
+  clearInterval(idShowRulesInterval2);
+  clearInterval(idShowRulesInterval3);
+  clearTimeout(idSetTimeoutShowGameOver);
+  clearInterval(dropCollisionIntervalId);
+}
+
+function resetGame() {
   countRightAnswers = 0;
   totalDropsCreated = 0;
   countAutoDrop = 0;
   seaLevelHeight = 0;
-  livesCount = 3;
+  score = 0;
+  updateScore();
+
+  livesCount = initialLives;
+  createHearts();
   wave.style.height = initialWaveHeight + "px";
+  gameSpeed = initialGameSpeed;
+  answerInput.value = "";
+
+  hearts.forEach((heart) => {
+    heart.classList.remove("game__lose");
+  });
+  if (
+    btn9.classList.contains("press-btn") ||
+    btnEnter.classList.contains("press-btn")
+  ) {
+    btn9.classList.remove("press-btn");
+    btnEnter.classList.remove("press-btn");
+  }
 }

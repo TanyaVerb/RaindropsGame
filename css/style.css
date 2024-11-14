@@ -274,9 +274,6 @@
       -ms-flex-pack: center;
           justify-content: center;
 }
-.game__instructions-slider-slide {
-  padding: 10px;
-}
 .game__instructions-controls {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -305,6 +302,7 @@
       -ms-flex-pack: center;
           justify-content: center;
   gap: 20px;
+  padding: 10px;
 }
 .game__instructions-slider-slide-text {
   font-size: 18px;
@@ -534,11 +532,17 @@
   font-weight: bold;
   color: rgb(255, 0, 0);
 }
+@media screen and (max-width: 768px) {
+  .game__points {
+    font-size: 40px;
+  }
+}
 @media screen and (max-width: 480px) {
   .game__points {
     font-size: 30px;
   }
 }
+
 @-webkit-keyframes waves {
   0% {
     background-position-x: 0;
@@ -556,6 +560,7 @@
     background-position-x: 0px;
   }
 }
+
 @keyframes waves {
   0% {
     background-position-x: 0;
@@ -574,8 +579,8 @@
   }
 }
 .fade-out {
-  -webkit-animation: fadeOut 2s ease-out;
-          animation: fadeOut 2s ease-out;
+  -webkit-animation: fadeOut 1.5s ease-out;
+          animation: fadeOut 1.5s ease-out;
 }
 
 @-webkit-keyframes fadeOut {
@@ -723,7 +728,8 @@
   width: 100%;
   height: 100%;
   background: rgb(228, 227, 227);
-  text-align: center;
+  text-align: end;
+  padding: 0 7px;
   font-size: 40px;
   border: solid 0.5px rgb(192, 191, 191);
   -webkit-box-sizing: border-box;
@@ -1032,21 +1038,30 @@ button:active,
 button:focus {
   border: none !important;
   outline: none !important;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
 
 html {
   font-size: 10px;
+}
+
+body {
   scroll-behavior: smooth;
   background: -webkit-gradient(linear, left top, left bottom, color-stop(50%, rgb(250, 250, 253)), to(rgb(132, 210, 230))) no-repeat;
   background: linear-gradient(rgb(250, 250, 253) 50%, rgb(132, 210, 230)) no-repeat;
   min-width: 320px;
+  margin: 0 auto;
 }
 
 .wrapper {
-  max-width: 1000px;
-  min-width: 320px;
   height: 100vh;
   margin: 0 auto;
+  overflow: hidden;
+  max-width: 1000px;
+  min-width: 320px;
 }
 
 @media (max-width: 853px) {
@@ -1065,18 +1080,12 @@ html {
   }
 }
 .btn {
-  outline: none !important;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
   padding: 10px 40px;
   margin: 10px;
   color: rgb(255, 255, 255);
   font-size: 20px;
   cursor: pointer;
   border-radius: 4px;
-  /* border: none; */
   -webkit-box-shadow: inset rgba(0, 0, 0, 0.6) 0 -3px 8px, inset rgba(252, 255, 255, 0.7) 0 3px 8px, rgba(0, 0, 0, 0.8) 0 3px 8px -3px;
           box-shadow: inset rgba(0, 0, 0, 0.6) 0 -3px 8px, inset rgba(252, 255, 255, 0.7) 0 3px 8px, rgba(0, 0, 0, 0.8) 0 3px 8px -3px;
 }
