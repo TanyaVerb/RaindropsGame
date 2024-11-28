@@ -18,6 +18,12 @@
       href="https://fonts.googleapis.com/css2?family=Courgette&display=swap"
       rel="stylesheet"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="wrapper">
@@ -31,11 +37,67 @@
 
         <div class="greeting__buttons-container">
           <button class="how-to-play btn">How to Play</button>
-          <button class="play btn">Play</button>
+          <button id="play" class="btn-green btn">Play</button>
         </div>
       </div>
 
       <div class="game-container">
+        <div class="game__instructions">
+          <h2 class="game__instructions-title">Instructions</h2>
+          <div class="game__instructions-content">
+            <!-- слайдер -->
+            <div class="game__instructions-slider" id="slider">
+              <div class="game__instructions-slider-slide slide-1">
+                <p class="game__instructions-slider-slide-text">
+                  Solve the equation in the raindrop before it reaches the
+                  water.
+                </p>
+                <p class="game__instructions-slider-slide-text">
+                  Select your answer on the number pad in the game and click.
+                  Enter or use your computer keyboard and press the Enter key.
+                </p>
+              </div>
+              <div class="game__instructions-slider-slide slide-2">
+                <p class="game__instructions-slider-slide-text">
+                  The game is over when three raindrops reach the water level.
+                </p>
+              </div>
+              <div class="game__instructions-slider-slide slide-3">
+                <p class="game__instructions-slider-slide-text">
+                  Raindrops green are bonuses! Solve the equation inside the
+                  raindrop green and all the raindrops dry up.
+                </p>
+                <div id="img-bonus-container">
+                  <img
+                    src="/img/bonus.png"
+                    alt="raindrop green"
+                    id="img-bonus"
+                  />
+                  <div class="bonus-example">
+                    <div>18</div>
+                    <div>/</div>
+                    <div>2</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!--  -->
+            <div class="game__instructions-controls">
+              <button class="game__instructions-btn btn-green btn" id="btnPrev">
+                Back &#10094;
+              </button>
+              <button class="game__instructions-btn btn-green btn" id="btnNext">
+                Next &#10095;
+              </button>
+            </div>
+          </div>
+          <div class="game__instructions-play">
+            <button id="instruction-play-btn" class="btn btn-green">
+              Play
+            </button>
+          </div>
+        </div>
         <div class="game">
           <div class="game__fail game__points"></div>
 
@@ -62,61 +124,80 @@
             src="sound/drop.mp3"
           ></audio>
 
-          <!-- <div class="drop"></div> -->
           <div class="game__place">
             <div class="game__lives-container">
               <p class="game__lives-text">lives:</p>
-              <div class="game__hearts-container">
-                <div class="game__heart"></div>
-                <div class="game__heart"></div>
-                <div class="game__heart"></div>
-              </div>
+              <div class="game__hearts-container"></div>
             </div>
 
-            <div class="game__wave-container">
-              <div class="game__wave-one game__wave"></div>
-              <div class="game__wave-two game__wave"></div>
-              <!-- <img class="wave-img" src="img/wave2.png" alt="wave" > -->
-            </div>
+            <div class="game__wave-one game__wave"></div>
+            <div class="game__wave-two game__wave"></div>
           </div>
           <div class="result-entry">
             <div class="result-entry__score">
-              Score: <span class="result-entry__score-value" id="score">0</span>
+              Score:
+              <span class="result-entry__score-value" id="score">0</span>
             </div>
             <div class="result-entry__calc">
               <div class="result-entry__calc-answer">
                 <input class="result-entry__calc-answer-display" value="" />
               </div>
               <div class="result-entry__calc-keyboard">
-                <div><button class="result-entry__key number">7</button></div>
-                <div><button class="result-entry__key number">8</button></div>
-                <div><button class="result-entry__key number">9</button></div>
-                <div id="clear">
-                  <button class="result-entry__key clear">Clear</button>
+                <div>
+                  <button data-num="7" class="result-entry__key">7</button>
                 </div>
-                <div><button class="result-entry__key number">4</button></div>
-                <div><button class="result-entry__key number">5</button></div>
-                <div><button class="result-entry__key number">6</button></div>
-                <div><button class="result-entry__key number">1</button></div>
-                <div><button class="result-entry__key number">2</button></div>
-                <div><button class="result-entry__key number">3</button></div>
+                <div>
+                  <button data-num="8" class="result-entry__key">8</button>
+                </div>
+                <div>
+                  <button data-num="9" class="result-entry__key">9</button>
+                </div>
+                <div id="clear">
+                  <button data-func="Escape" class="result-entry__key clear">
+                    Clear
+                  </button>
+                </div>
+                <div>
+                  <button data-num="4" class="result-entry__key">4</button>
+                </div>
+                <div>
+                  <button data-num="5" class="result-entry__key">5</button>
+                </div>
+                <div>
+                  <button data-num="6" class="result-entry__key">6</button>
+                </div>
+                <div>
+                  <button data-num="1" class="result-entry__key">1</button>
+                </div>
+                <div>
+                  <button data-num="2" class="result-entry__key">2</button>
+                </div>
+                <div>
+                  <button data-num="3" class="result-entry__key">3</button>
+                </div>
                 <div id="enter">
-                  <button class="result-entry__key enter">Enter</button>
+                  <button data-func="Enter" class="result-entry__key enter">
+                    Enter
+                  </button>
                 </div>
                 <div id="zero">
-                  <button class="result-entry__key number">0</button>
+                  <button data-num="0" class="result-entry__key">0</button>
                 </div>
                 <div id="delete-key">
-                  <button class="result-entry__key delete-key">Delete</button>
+                  <button
+                    data-func="Delete"
+                    class="result-entry__key delete-key"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>
             <button id="full" class="btn fullscreen"></button>
-            <!-- <div class="level-display">Level</div> -->
+            <div class="level-display">Level</div>
           </div>
         </div>
       </div>
-
       <div class="score-board">
         <div class="score-board__title-container">
           <h2 class="score-board__title">Raindrops</h2>
@@ -134,7 +215,9 @@
             <div class="score-board__result-wrong-answers"></div>
           </div>
         </div>
-        <button class="score-board__continue btn">Continue</button>
+        <div style="height: 30%">
+          <button class="score-board__continue btn">Continue</button>
+        </div>
       </div>
     </div>
 
